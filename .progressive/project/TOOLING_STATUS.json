@@ -1,0 +1,56 @@
+{
+  "schema": 1,
+  "profile": "recommended",
+  "last_bootstrap": "2026-09-03T00:00:00+05:00",
+  "tools": {
+    "semble": {
+      "status": "not_checked",
+      "checked_at": null,
+      "version": null,
+      "evidence": null,
+      "notes": "Not needed for initialization; native targeted search is the fallback."
+    },
+    "serena": {
+      "status": "available",
+      "checked_at": "2026-09-03T00:00:00+05:00",
+      "version": null,
+      "evidence": "command -v serena -> /Users/elguajo/.local/bin/serena",
+      "notes": "Use on demand for known-symbol navigation or refactoring."
+    },
+    "rtk": {
+      "status": "not_checked",
+      "checked_at": null,
+      "version": null,
+      "evidence": null,
+      "notes": "Not needed for initialization; raw targeted output is the fallback."
+    },
+    "superpowers": {
+      "status": "not_checked",
+      "checked_at": null,
+      "version": null,
+      "evidence": null,
+      "notes": "Progressive implementation and quality skills are the available fallback."
+    },
+    "gstack": {
+      "status": "not_checked",
+      "checked_at": null,
+      "version": null,
+      "evidence": null,
+      "notes": "Load only for a material review, browser QA, or release check."
+    },
+    "context7": {
+      "status": "not_checked",
+      "checked_at": null,
+      "version": null,
+      "evidence": null,
+      "notes": "Use current primary documentation when version-sensitive guidance is needed."
+    },
+    "github_spec_kit": {
+      "status": "available",
+      "checked_at": "2026-09-03T00:00:00+05:00",
+      "version": null,
+      "evidence": "command -v specify -> /Users/elguajo/.local/bin/specify",
+      "notes": "Detected but not selected: Advanced Spec is unnecessary for the current local single-user V1."
+    }
+  }
+}

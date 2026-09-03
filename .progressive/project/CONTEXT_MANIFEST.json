@@ -1,0 +1,67 @@
+{
+  "schema": 1,
+  "default": {
+    "required": [
+      ".progressive/project/PROJECT_BRIEF.md",
+      ".progressive/project/ARCHITECTURE.md",
+      ".progressive/project/ROADMAP.md"
+    ],
+    "skills": [],
+    "notes": [
+      "The detailed source specification is consulted on demand, not loaded as default context.",
+      "Reference notes are observations and recommendations, not approved product changes."
+    ]
+  },
+  "phases": {
+    ".progressive/phases/01-foundation.md": {
+      "required": [
+        ".progressive/phases/01-foundation.md",
+        ".progressive/decisions/ADR-001-local-first-sqlite.md",
+        ".progressive/decisions/ADR-002-one-project-entity-for-all-views.md",
+        ".progressive/decisions/ADR-003-calendar-date-semantics.md"
+      ],
+      "skills": ["implementation-execution"],
+      "notes": ["Load the source specification only to resolve a missing or conflicting requirement."]
+    },
+    ".progressive/phases/02-project-domain-and-crud.md": {
+      "required": [
+        ".progressive/phases/02-project-domain-and-crud.md",
+        ".progressive/decisions/ADR-001-local-first-sqlite.md",
+        ".progressive/decisions/ADR-002-one-project-entity-for-all-views.md",
+        ".progressive/decisions/ADR-003-calendar-date-semantics.md"
+      ],
+      "skills": ["implementation-execution", "security-sensitive-change"],
+      "notes": []
+    },
+    ".progressive/phases/03-kanban.md": {
+      "required": [
+        ".progressive/phases/03-kanban.md",
+        ".progressive/decisions/ADR-002-one-project-entity-for-all-views.md"
+      ],
+      "skills": ["implementation-execution", "accessibility-review"],
+      "notes": ["Review the Kanban reference note before visual implementation."]
+    },
+    ".progressive/phases/04-timeline.md": {
+      "required": [
+        ".progressive/phases/04-timeline.md",
+        ".progressive/decisions/ADR-002-one-project-entity-for-all-views.md",
+        ".progressive/decisions/ADR-003-calendar-date-semantics.md"
+      ],
+      "skills": ["implementation-execution", "accessibility-review", "performance-review"],
+      "notes": ["Review the Timeline reference note before visual implementation; task/event lanes remain out of scope."]
+    },
+    ".progressive/phases/05-list-and-project-details.md": {
+      "required": [".progressive/phases/05-list-and-project-details.md"],
+      "skills": ["implementation-execution", "accessibility-review"],
+      "notes": []
+    },
+    ".progressive/phases/06-backup-resilience-and-polish.md": {
+      "required": [
+        ".progressive/phases/06-backup-resilience-and-polish.md",
+        ".progressive/decisions/ADR-001-local-first-sqlite.md"
+      ],
+      "skills": ["implementation-execution", "security-sensitive-change", "accessibility-review", "performance-review"],
+      "notes": ["Import is an untrusted-input boundary and must validate before replacement."]
+    }
+  }
+}

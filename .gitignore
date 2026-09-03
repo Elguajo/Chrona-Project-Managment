@@ -1,0 +1,18 @@
+# Dependencies and build output
+node_modules/
+.next/
+out/
+*.tsbuildinfo
+__pycache__/
+*.py[cod]
+
+# Local application data
+data/
+
+# Environment files
+.env*
+!.env.example
+
+# Operating system files
+.DS_Store
+.gstack/

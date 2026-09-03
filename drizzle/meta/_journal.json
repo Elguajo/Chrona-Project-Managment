@@ -1,0 +1,27 @@
+{
+  "version": "7",
+  "dialect": "sqlite",
+  "entries": [
+    {
+      "idx": 0,
+      "version": "6",
+      "when": 1788432289575,
+      "tag": "0000_lively_junta",
+      "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "6",
+      "when": 1788433372031,
+      "tag": "0001_wandering_smiling_tiger",
+      "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "6",
+      "when": 1788435212808,
+      "tag": "0002_sticky_redwing",
+      "breakpoints": true
+    }
+  ]
+}
