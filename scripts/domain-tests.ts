@@ -322,6 +322,15 @@ async function main() {
     await expectValidation(() => createProjectFromTemplate(clientTemplate.id, projectForm({ name: "Invalid delivery", startDate: "2026-04-01", deadline: "2026-04-10" })));
     assert.equal(database.select().from(projects).all().length, beforeTemplateProjectCount + 1);
 
+    const backupCoverForm = projectForm({ name: "Backup cover asset", coverMode: "image" });
+    backupCoverForm.set(
+      "coverImage",
+      new File([Uint8Array.of(137, 80, 78, 71, 13, 10, 26, 10)], "backup-cover.png", { type: "image/png" }),
+    );
+    await createProject(backupCoverForm);
+    const backupCoverPath = getProjects().find((project) => project.name === "Backup cover asset")?.coverImagePath;
+    assert.ok(backupCoverPath);
+
     const { BackupValidationError, createBackup, restoreBackup } = await import("../src/lib/backup/server");
     const backup = createBackup();
     const backupProjectCount = database.select().from(projects).all().length;
@@ -334,6 +343,7 @@ async function main() {
     assert.equal(database.select().from(projects).all().length, backupProjectCount);
     assert.equal(database.select().from(projectTasks).all().length, backupTaskCount);
     assert.equal(getProjects().find((project) => project.id === cloneId)?.documents.length, clientTemplate.documents.length);
+    assert.ok(existsSync(path.join(testDirectory, backupCoverPath)));
     const incompatibleBackup = structuredClone(backup) as { version: number };
     incompatibleBackup.version = 999;
     assert.throws(() => restoreBackup(incompatibleBackup), BackupValidationError);
