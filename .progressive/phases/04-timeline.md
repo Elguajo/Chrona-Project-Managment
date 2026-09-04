@@ -21,14 +21,14 @@ Render the Project portfolio as correct month/quarter time ranges without a day-
 - [x] Implement Timeline projection and positioned bars from shared Project records.
 - [x] Add tested Milestone annotations to the owning Project bar/details.
 - [x] Add navigation, filters, and responsive overflow handling. Grouping remains intentionally limited to the default ungrouped portfolio view.
-- [ ] Verify the specified timeline and cross-view scenarios.
+- [x] Verify the specified timeline and cross-view scenarios.
 
 ## Acceptance criteria
 
-- [ ] Bars, Today, elapsed, remaining, and time progress are correct for supported ranges.
-- [ ] No-deadline projects grow to Today; overdue projects are distinct; completed/cancelled projects end correctly.
-- [ ] Filters work and switching views neither duplicates nor loses project state.
-- [ ] Approximately 500 projects remain responsive without a cell-per-day-per-project grid.
+- [x] Bars, Today, elapsed, remaining, and time progress are correct for supported ranges.
+- [x] No-deadline projects grow to Today; overdue projects are distinct; completed/cancelled projects end correctly.
+- [x] Filters work and switching views neither duplicates nor loses project state.
+- [x] Approximately 500 projects remain responsive without a cell-per-day-per-project grid.
 
 ## Verification
 
@@ -50,4 +50,4 @@ Observed verification:
 
 Remaining verification:
 
-- Browser-level navigation, scroll, marker placement, and visual density smoke remain pending while no local Playwright Chromium executable is available.
+Completed 2026-09-04 in a real local Edge session backed by an isolated SQLite database with 508 realistic Projects. Month and Quarter, Previous/Next/Today, status/type filters, a 730px horizontal scroll, two Today markers, and the visual density of 509 Timeline rows were exercised. The browser showed 30 Month / 92 Quarter date headers and one positioned Project row/bar per record, rather than a cell-per-day-per-project grid. No browser console errors were observed.

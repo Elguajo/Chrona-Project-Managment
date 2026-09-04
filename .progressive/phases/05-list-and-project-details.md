@@ -28,7 +28,7 @@ Provide a sortable portfolio table plus a drawer and full Project workspace for 
 - [ ] List columns are sortable and show the same persisted values as Kanban and Timeline.
 - [x] A project opened from any portfolio view has a usable drawer and full detail route.
 - [x] Quick edits, links, and activity persist and are reflected in all projections.
-- [ ] Keyboard escape/focus and responsive drawer behaviour are usable. Browser smoke remains pending because local Chromium is unavailable.
+- [x] Keyboard escape/focus and responsive drawer behaviour are usable.
 - [x] A Task, Milestone, and Document added in a Project workspace survive reload and never appear under another Project.
 
 ## Verification
@@ -47,4 +47,4 @@ Implemented: 2026-09-04
 - `/projects/[id]` reads the same Project aggregate as List, Kanban, Timeline, and the drawer; it adds no view-owned records.
 - The route presents status, dates, Work Progress, derived Time Progress, project schedule/milestones, links, Task/Milestone/Document controls, and activity.
 - Project and workspace server actions revalidate both the portfolio and the owning standalone route. Domain coverage verifies the standalone aggregate's ownership and activity; production HTTP smoke rendered the portfolio, populated workspace route, and missing-project 404 against a fresh temporary SQLite database.
-- Full keyboard/drag browser smoke remains pending: no local Playwright Chromium executable was available, and no browser was downloaded.
+- Real-browser drawer smoke completed 2026-09-04 in Edge: Escape closes the native modal and returns focus to the triggering Timeline Project button on desktop and at 375px. The mobile drawer is a full-screen sheet with a single internal scroll container; the prior nested native-dialog scrollbar was removed.

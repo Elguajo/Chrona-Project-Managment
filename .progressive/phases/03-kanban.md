@@ -51,4 +51,4 @@ Observed verification:
 
 Remaining verification:
 
-- Browser-level keyboard operation of `Move to…`, focus return from the drawer, and native drag/drop could not run because the installed Playwright browser runner has no local Chromium executable. No browser download was performed.
+- Real-browser keyboard operation of `Move to…` persisted a Project's status and status history across reload. A selected Kanban view also remains active after the server refresh. Native HTML5 drag/reorder could not be completed through the available CUA browser session: its drag gesture does not emit `dragstart`/`drop` for the card, in either the in-app browser or Edge. No product defect was inferred from that automation limitation.

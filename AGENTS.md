@@ -84,3 +84,13 @@ If a preferred tool is absent and materially useful, use `tooling-bootstrap`: ve
 ## Canonical project state
 
 Brief owns product outcome/scope; Architecture owns system shape/boundaries; Roadmap owns phase order/status; current Phase owns execution/acceptance/verification; completed Phase owns its compact Completion Record; `CONTEXT_MANIFEST.json` owns optional phase hints; ADR owns consequential rationale; NEXT_SESSION is overwriteable hot navigation; `TOOLING_STATUS.json` is tooling cache. Use `.progressive/system/LAYER_OWNERSHIP.md` when placement is ambiguous.
+
+<!-- BEGIN:nextjs-agent-rules -->
+
+# This is NOT the Next.js you know
+
+This version has breaking changes — APIs, conventions, and file structure may all differ from your training data. Read the relevant guide in `node_modules/next/dist/docs/` (resolved from this file's directory; in monorepos the `next` package may not be visible from the repo root) before writing any code. Heed deprecation notices.
+
+This block is written and re-added by `next dev` — verify at `node_modules/next/dist/server/lib/generate-agent-files.js`. Removing it from a diff only re-creates the uncommitted change; committing it with your work keeps the tree clean.
+
+<!-- END:nextjs-agent-rules -->
