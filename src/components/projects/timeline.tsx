@@ -1,7 +1,7 @@
 "use client";
 
 import { ChevronLeft, ChevronRight, Clock3, Flag, Search, ZoomIn, ZoomOut } from "lucide-react";
-import { useEffect, useLayoutEffect, useMemo, useRef, useState, type Dispatch, type PointerEvent, type SetStateAction, type WheelEvent } from "react";
+import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState, type Dispatch, type PointerEvent, type SetStateAction } from "react";
 
 import { ProjectDrawer } from "@/components/projects/kanban-board";
 import { Button } from "@/components/ui/button";
@@ -202,7 +202,7 @@ export function Timeline({ projects, viewport, onViewportChange }: TimelineProps
     maybeExtendRange(nextScrollLeft);
   }
 
-  function zoomAt(pointerOffset: number, nextPixelsPerDay: number) {
+  const zoomAt = useCallback((pointerOffset: number, nextPixelsPerDay: number) => {
     const next = clampPixelsPerDay(nextPixelsPerDay);
     if (next === viewport.pixelsPerDay) return;
     const scroller = scrollerRef.current;
@@ -218,16 +218,23 @@ export function Timeline({ projects, viewport, onViewportChange }: TimelineProps
     const centerDate = timelineDateAtOffset(range.start, nextScrollLeft + timelineViewportWidth / 2, next);
     onViewportChange({ centerDate, pixelsPerDay: next });
     setScrollLeft(nextScrollLeft);
-  }
+  }, [onViewportChange, range.start, timelineViewportWidth, viewport.pixelsPerDay]);
 
-  function handleWheel(event: WheelEvent<HTMLDivElement>) {
+  const handleWheel = useCallback((event: WheelEvent) => {
     if (event.ctrlKey || event.metaKey || Math.abs(event.deltaX) > Math.abs(event.deltaY) || event.deltaY === 0) return;
     const scroller = scrollerRef.current;
     if (!scroller) return;
     event.preventDefault();
     const pointerOffset = Math.max(0, Math.min(timelineViewportWidth, event.clientX - scroller.getBoundingClientRect().left - LABEL_WIDTH));
     zoomAt(pointerOffset, viewport.pixelsPerDay * Math.exp(-event.deltaY * 0.002));
-  }
+  }, [timelineViewportWidth, viewport.pixelsPerDay, zoomAt]);
+
+  useEffect(() => {
+    const scroller = scrollerRef.current;
+    if (!scroller) return;
+    scroller.addEventListener("wheel", handleWheel, { passive: false });
+    return () => scroller.removeEventListener("wheel", handleWheel);
+  }, [handleWheel]);
 
   function isInteractiveTarget(target: EventTarget | null) {
     return target instanceof Element && Boolean(target.closest("[data-timeline-interactive]"));
@@ -327,7 +334,6 @@ export function Timeline({ projects, viewport, onViewportChange }: TimelineProps
         onPointerUp={endPan}
         onPointerCancel={endPan}
         onScroll={handleScroll}
-        onWheel={handleWheel}
       >
         <div className="grid grid-cols-[18rem_auto]" style={{ width: `${LABEL_WIDTH + canvasWidth}px` }}>
           <div className="sticky top-0 z-30 h-12 border-b border-r bg-[var(--background)] p-3 text-sm font-semibold">{visiblePeriodLabel(visibleCenterDate)}</div>
