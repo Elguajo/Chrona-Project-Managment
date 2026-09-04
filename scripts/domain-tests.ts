@@ -57,6 +57,7 @@ async function main() {
     const { createDocument, createMilestone, createTask, deleteDocument, deleteMilestone, deleteTask, toggleMilestone, updateDocument, updateTask } = await import("../src/lib/workspace/server");
     const { createProjectFromTemplate, createTemplate, deleteTemplate, getProjectTemplates, updateTemplate } = await import("../src/lib/templates/server");
     const { clippedRange, dateRange, periodFor, shiftPeriod, timelineProject } = await import("../src/lib/timeline/date");
+    const { TIMELINE_MAX_PIXELS_PER_DAY, TIMELINE_MIN_PIXELS_PER_DAY, clampPixelsPerDay, extendTimelineRange, fitTimelineViewport, shiftTimelineCenter, timelineDateAtOffset, timelineRangeForDates, timelineTickDates, timelineTickMode, zoomScrollLeft } = await import("../src/lib/timeline/viewport");
     const { calendarDates, calendarItems, calendarPeriod, filterCalendarItems, shiftCalendarPeriod } = await import("../src/lib/calendar/calendar");
 
     await createProject(projectForm());
@@ -124,6 +125,20 @@ async function main() {
     assert.equal(projectTiming?.displayEnd, "2026-02-20");
     assert.equal(projectTiming?.metrics.overdueDays, 10);
     assert.deepEqual(clippedRange("2026-02-01", "2026-02-28", month.start, month.end), { left: 0, width: 100 });
+    assert.equal(clampPixelsPerDay(1), TIMELINE_MIN_PIXELS_PER_DAY);
+    assert.equal(clampPixelsPerDay(120), TIMELINE_MAX_PIXELS_PER_DAY);
+    assert.equal(timelineTickMode(48), "day");
+    assert.equal(timelineTickMode(12), "week");
+    assert.equal(timelineTickMode(11.9), "month");
+    assert.equal(timelineDateAtOffset("2026-01-01", 15 * 32, 32), "2026-01-16");
+    assert.equal(zoomScrollLeft({ start: "2026-01-01", scrollLeft: 320, pointerOffset: 160, previousPixelsPerDay: 32, nextPixelsPerDay: 64 }), 800);
+    const timelineRange = timelineRangeForDates(["2026-01-10", "2026-02-10"], "2026-02-20");
+    assert.deepEqual(timelineRange, { start: "2025-01-10", end: "2027-02-20" });
+    assert.equal(extendTimelineRange(timelineRange, "start").start < timelineRange.start, true);
+    assert.equal(extendTimelineRange(timelineRange, "end").end > timelineRange.end, true);
+    assert.equal(shiftTimelineCenter("2026-01-31", 800, 32, 1), "2026-02-20");
+    assert.deepEqual(fitTimelineViewport(["2026-01-01", "2026-01-31"], "2026-01-15", 900), { centerDate: "2026-01-24", pixelsPerDay: 20 });
+    assert.deepEqual(timelineTickDates("2026-02-18", "2026-02-22", "week"), ["2026-02-16"]);
     const calendarMonth = calendarPeriod("2026-02-18", "month");
     assert.deepEqual(calendarMonth, { start: "2026-01-26", end: "2026-03-01" });
     assert.equal(calendarDates(calendarMonth).length, 35);

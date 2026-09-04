@@ -2,18 +2,18 @@
 
 ## Goal
 
-Render the Project portfolio as correct month/quarter time ranges without a day-by-project DOM grid.
+Render the Project portfolio in a continuous date viewport without a day-by-project DOM grid.
 
 ## In scope
 
-- Month and Quarter navigation, local Today line, sticky calendar header/project column, horizontal scrolling, grouping, and filtering.
+- Continuous date viewport with wheel zoom, adaptive Day/Week/Month/Quarter labels, middle-button and Space-drag panning, local Today line, sticky calendar header/project column, horizontal scrolling, grouping, and filtering.
 - Mathematically positioned project bars, unscheduled group, deadline, overdue, no-deadline, completed, cancelled, and time metrics.
 - Dated Milestone annotations for a Project without turning Milestones into independent Timeline rows.
 - Cross-view read consistency and tests for date semantics.
 
 ## Out of scope
 
-- Task rendering, dependencies, drag-resizing, day scale, and custom calendar rules.
+- Task rendering, dependencies, drag-resizing of Project dates, custom calendar rules, and persisted Timeline viewport settings.
 
 ## Tasks
 
@@ -40,14 +40,12 @@ Implemented: 2026-09-03
 
 Delivered:
 
-- A Month/Quarter Timeline over the shared Project records with previous/next/Today navigation, date-only calendar math, filters, horizontal overflow, a sticky date header/project column, and an unscheduled group.
+- A continuous Timeline viewport over shared Project records with a 3–96 px/day scale, cursor-anchored zoom, adaptive Day/Week/Month/Quarter labels, Previous/Next/Today/Fit controls, dynamic yearly range extension, filters, horizontal overflow, a sticky date header/project column, and an unscheduled group.
 - One mathematically positioned bar per scheduled Project rather than a day-by-project DOM grid; active, terminal, no-deadline, and overdue ranges have distinct derived behaviour.
 - Milestone diamonds drawn only on their owning Project range, using the related Project Milestone records.
 
 Observed verification:
 
-- `pnpm test:domain`, `pnpm check:database`, `pnpm typecheck`, `pnpm lint`, and `pnpm build` passed. Domain coverage includes Month/Quarter ranges, navigation, range clipping, and overdue calculation.
+- `pnpm test:domain`, `pnpm check:database`, `pnpm typecheck`, `pnpm lint`, and `pnpm build` passed. Domain coverage includes viewport scale clamping, cursor-preserving zoom, adaptive tick thresholds, fit/navigation, range extension, clipping, and overdue calculation. A fresh temporary SQLite migration and production HTTP smoke (`/` 200, missing Project 404) also passed.
 
-Remaining verification:
-
-Completed 2026-09-04 in a real local Edge session backed by an isolated SQLite database with 508 realistic Projects. Month and Quarter, Previous/Next/Today, status/type filters, a 730px horizontal scroll, two Today markers, and the visual density of 509 Timeline rows were exercised. The browser showed 30 Month / 92 Quarter date headers and one positioned Project row/bar per record, rather than a cell-per-day-per-project grid. No browser console errors were observed.
+Completed 2026-09-04 in a real local browser session backed by an isolated SQLite database with 509 realistic Projects. Day, Week, and Month/Quarter density; Previous/Next/Today/Fit; status filtering; Today and overdue markers; Project drawer Escape/focus return; and viewport retention across Dashboard → Timeline were exercised. One positioned Project bar per record was rendered without a cell-per-day-per-project grid, and no browser console errors were observed. The available CUA runner cannot hold Space or drag with the middle mouse button, so those two native gesture paths remain unconfirmed browser-only behaviour.
