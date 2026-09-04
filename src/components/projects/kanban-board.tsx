@@ -59,11 +59,22 @@ function moveInMemory(projects: ProjectRecord[], projectId: string, toStatus: Pr
   return remaining;
 }
 
+function orderBoardProjects(projects: ProjectRecord[]) {
+  return [...projects].sort((left, right) => {
+    const statusDifference = PROJECT_STATUSES.indexOf(left.status as ProjectStatus) - PROJECT_STATUSES.indexOf(right.status as ProjectStatus);
+    if (statusDifference !== 0) return statusDifference;
+    const leftOrder = left.sortOrder ?? Number.POSITIVE_INFINITY;
+    const rightOrder = right.sortOrder ?? Number.POSITIVE_INFINITY;
+    if (leftOrder !== rightOrder) return leftOrder - rightOrder;
+    return left.createdAt.localeCompare(right.createdAt);
+  });
+}
+
 type KanbanBoardProps = { projects: ProjectRecord[]; templates?: ProjectTemplateRecord[] };
 
 export function KanbanBoard({ projects, templates = [] }: KanbanBoardProps) {
   const router = useRouter();
-  const [boardProjects, setBoardProjects] = useState(projects);
+  const [boardProjects, setBoardProjects] = useState(() => orderBoardProjects(projects));
   const [editingId, setEditingId] = useState<string | "new" | null>(null);
   const [draggedId, setDraggedId] = useState<string | null>(null);
   const [isSavingMove, setIsSavingMove] = useState(false);

@@ -484,6 +484,7 @@ export function moveProject(projectId: string, toStatus: ProjectStatus, beforePr
   const next = destination[insertionIndex];
   const previousOrder = previous ? projectOrderValue(previous, insertionIndex - 1) : null;
   const nextOrder = next ? projectOrderValue(next, insertionIndex) : null;
+  const needsOrderNormalization = destination.some((project) => project.sortOrder === null);
   let sortOrder = previousOrder !== null && nextOrder !== null
     ? (previousOrder + nextOrder) / 2
     : previousOrder !== null
@@ -494,7 +495,13 @@ export function moveProject(projectId: string, toStatus: ProjectStatus, beforePr
 
   const eventTime = now();
   database.transaction((transaction) => {
-    if (previousOrder !== null && nextOrder !== null && Math.abs(nextOrder - previousOrder) < ORDER_PRECISION_LIMIT) {
+    if (needsOrderNormalization) {
+      destination.forEach((project, index) => {
+        const normalizedIndex = index >= insertionIndex ? index + 1 : index;
+        transaction.update(projects).set({ sortOrder: (normalizedIndex + 1) * ORDER_GAP }).where(eq(projects.id, project.id)).run();
+      });
+      sortOrder = (insertionIndex + 1) * ORDER_GAP;
+    } else if (previousOrder !== null && nextOrder !== null && Math.abs(nextOrder - previousOrder) < ORDER_PRECISION_LIMIT) {
       const compacted = [...destination];
       compacted.splice(insertionIndex, 0, existing);
       compacted.forEach((project, index) => {

@@ -158,6 +158,14 @@ async function main() {
     const orderedProject = getProjects().find((project) => project.name === "Ordered active project");
     assert.ok(orderedProject);
     assert.throws(() => updateTask(orderedProject.id, workspaceProject!.tasks[0]!.id, updateTaskForm), ProjectValidationError);
+    const activeBeforeFirstReorder = getKanbanProjects().filter((project) => project.status === "active");
+    const existingActiveTarget = activeBeforeFirstReorder.find((project) => project.name === "Status active");
+    assert.ok(existingActiveTarget);
+    moveProject(orderedProject.id, "active", existingActiveTarget.id);
+    assert.deepEqual(
+      getKanbanProjects().filter((project) => project.status === "active").slice(0, 3).map((project) => project.name),
+      ["Website refresh", "Ordered active project", "Status active"],
+    );
     moveProject(orderedProject.id, "active", created[0].id);
     const activeKanbanProjects = getKanbanProjects().filter((project) => project.status === "active");
     assert.deepEqual(activeKanbanProjects.slice(0, 2).map((project) => project.id), [orderedProject.id, created[0].id]);
