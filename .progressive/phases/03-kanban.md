@@ -24,8 +24,8 @@ Show each Project in exactly one lifecycle column and persist accessible status 
 ## Acceptance criteria
 
 - [x] Each Project occurs in exactly one default column and counts stay correct.
-- [ ] Drag and `Move to…` persist status; completing/reopening maintains lifecycle timestamps. (Browser keyboard/drag smoke is pending because the local Playwright Chromium binary is unavailable.)
-- [ ] Manual order, search, filters, and status effects survive reload. (Persistence and rendered controls are verified; browser interaction smoke is pending.)
+- [x] Drag and `Move to…` persist status; completing/reopening maintains lifecycle timestamps.
+- [x] Manual order, search, filters, and status effects survive reload.
 - [x] Kanban changes become visible to later Timeline/List projections without duplicate data.
 
 ## Verification
@@ -49,6 +49,9 @@ Observed verification:
 - A production runtime smoke rendered the seven columns, a temporary Project card, and its `Move to…` control from a temporary SQLite database.
 - Accessibility review verified semantic controls, logical focusable controls, the native modal drawer with Escape/close affordances, live mutation feedback, and visible focus styling by source/runtime markup inspection.
 
-Remaining verification:
+Completed browser verification: 2026-09-04
 
-- Real-browser keyboard operation of `Move to…` persisted a Project's status and status history across reload. A selected Kanban view also remains active after the server refresh. Native HTML5 drag/reorder could not be completed through the available CUA browser session: its drag gesture does not emit `dragstart`/`drop` for the card, in either the in-app browser or Edge. No product defect was inferred from that automation limitation.
+- A production Next.js server backed by an isolated temporary SQLite database with realistic fixtures was exercised in local Microsoft Edge through Playwright Core, using the system Edge executable rather than downloading Chromium.
+- Native pointer drags emitted observed HTML5 `dragstart` and `drop` events for same-column reorder and a cross-column status move. Both persisted through reload.
+- The native `Move to…` control completed and then reopened a Project through reload. The temporary database recorded `completedAt` on completion, cleared it on reopening, and retained both lifecycle history entries.
+- Browser console errors were empty after the interaction suite.

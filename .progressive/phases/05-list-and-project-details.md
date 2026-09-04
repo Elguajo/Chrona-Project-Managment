@@ -25,7 +25,7 @@ Provide a sortable portfolio table plus a drawer and full Project workspace for 
 
 ## Acceptance criteria
 
-- [ ] List columns are sortable and show the same persisted values as Kanban and Timeline.
+- [x] List columns are sortable and show the same persisted values as Kanban and Timeline.
 - [x] A project opened from any portfolio view has a usable drawer and full detail route.
 - [x] Quick edits, links, and activity persist and are reflected in all projections.
 - [x] Keyboard escape/focus and responsive drawer behaviour are usable.
@@ -48,3 +48,4 @@ Implemented: 2026-09-04
 - The route presents status, dates, Work Progress, derived Time Progress, project schedule/milestones, links, Task/Milestone/Document controls, and activity.
 - Project and workspace server actions revalidate both the portfolio and the owning standalone route. Domain coverage verifies the standalone aggregate's ownership and activity; production HTTP smoke rendered the portfolio, populated workspace route, and missing-project 404 against a fresh temporary SQLite database.
 - Real-browser drawer smoke completed 2026-09-04 in Edge: Escape closes the native modal and returns focus to the triggering Timeline Project button on desktop and at 375px. The mobile drawer is a full-screen sheet with a single internal scroll container; the prior nested native-dialog scrollbar was removed.
+- A local Microsoft Edge browser run against an isolated temporary SQLite database verified Project, Status, Deadline, Work, and Updated columns in both sort directions, with values matching the shared Project records used by Kanban and Timeline.
