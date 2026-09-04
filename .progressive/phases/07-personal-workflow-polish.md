@@ -20,9 +20,12 @@ Make the local single-owner workspace faster to operate without adding collabora
 - Upcoming and overdue information is derived from existing date-only fields and the local system date.
 - Search never requires network access and does not disclose data outside the local process.
 
-## Progress Record
+## Completion Record
 
-Implemented early: 2026-09-03
+Completed: 2026-09-04
 
-- A local Dashboard derives active-project, overdue-project, open-agenda, and completed-Task counts plus Upcoming/Overdue agenda rows from existing Project, Task, and Milestone date/status data.
-- Project search is available in List, Kanban, and Timeline. Templates and keyboard-first global navigation remain planned.
+- Templates were verified without change: a starter template created a local Project in one SQLite transaction with its Tasks, Milestones, and Documents all owned by the new Project. Browser Quick Add created a fixture Project with 4 Tasks, 3 Milestones, and 1 Document; database inspection confirmed every child `projectId` matched that new Project.
+- Dashboard Upcoming and Overdue rows were verified without change. They derive solely from active Project deadlines, unfinished Task due dates, open Milestone target dates, and `localToday()` date-only comparison; no date is persisted as Today.
+- Search had an uncovered gap: List, Kanban, and Timeline searched only top-level Project fields and tags. They now share an in-memory matcher over the complete locally loaded Project aggregate: Project fields, tags, links, Tasks, Milestones, and Documents. The matcher performs no I/O or network request.
+- Local Microsoft Edge browser QA using Playwright Core and a fresh temporary `PROJECT_OS_DATA_DIR` observed three overdue and four upcoming rows for local `2026-09-04`; it found a Document in List, a Milestone in Kanban, and a link URL in Timeline. A browser-created template project closed the form successfully. No Edge console warnings or errors were observed.
+- Final evidence: `pnpm test:domain`, `pnpm check:database`, `pnpm typecheck`, `pnpm lint`, and `pnpm build` passed. A fresh temporary `PROJECT_OS_DATA_DIR` completed `pnpm db:migrate`; production HTTP smoke rendered Dashboard/Upcoming/Overdue from `/` and returned valid backup JSON from `/api/backup`.
