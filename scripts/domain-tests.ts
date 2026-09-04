@@ -44,6 +44,7 @@ async function main() {
       ProjectValidationError,
       archiveProject,
       createProject,
+      getProjectWorkspace,
       getProjects,
       getKanbanProjects,
       moveProject,
@@ -102,6 +103,14 @@ async function main() {
     documentForm.set("content", "Updated local note.");
     updateDocument(created[0].id, workspaceProject!.documents[0]!.id, documentForm);
     assert.equal(getProjects().find((project) => project.id === created[0].id)?.documents[0]?.content, "Updated local note.");
+    const standaloneWorkspace = getProjectWorkspace(created[0].id);
+    assert.ok(standaloneWorkspace);
+    assert.equal(standaloneWorkspace.project.id, created[0].id);
+    assert.equal(standaloneWorkspace.project.tasks[0]?.projectId, created[0].id);
+    assert.equal(standaloneWorkspace.project.milestones[0]?.projectId, created[0].id);
+    assert.equal(standaloneWorkspace.project.documents[0]?.projectId, created[0].id);
+    assert.ok(standaloneWorkspace.activity.some((event) => event.type === "document_updated"));
+    assert.equal(getProjectWorkspace("missing-project"), null);
 
     const month = periodFor("2026-02-18", "month");
     assert.deepEqual(month, { start: "2026-02-01", end: "2026-02-28" });

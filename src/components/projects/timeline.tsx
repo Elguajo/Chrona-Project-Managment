@@ -4,6 +4,7 @@ import { ChevronLeft, ChevronRight, Clock3, Flag, Search } from "lucide-react";
 import { useMemo, useState } from "react";
 
 import { Button } from "@/components/ui/button";
+import { ProjectDrawer } from "@/components/projects/kanban-board";
 import {
   clippedRange,
   dateRange,
@@ -34,6 +35,7 @@ export function Timeline({ projects }: { projects: ProjectRecord[] }) {
   const [query, setQuery] = useState("");
   const [status, setStatus] = useState("");
   const [type, setType] = useState("");
+  const [editingId, setEditingId] = useState<string | null>(null);
   const period = periodFor(anchor, scale);
   const days = dateRange(period.start, period.end);
   const rows = useMemo(() => {
@@ -81,7 +83,7 @@ export function Timeline({ projects }: { projects: ProjectRecord[] }) {
           </div>
           <div className="grid grid-cols-[18rem_minmax(0,1fr)]">
             <div className="sticky left-0 z-10 border-r bg-[var(--background)]">
-              {scheduled.map(({ project, timeline }) => <ProjectLabel key={project.id} project={project} metric={timeline.metrics.label} />)}
+              {scheduled.map(({ project, timeline }) => <ProjectLabel key={project.id} project={project} metric={timeline.metrics.label} onOpen={() => setEditingId(project.id)} />)}
             </div>
             <div className="relative" style={{ width: daysWidth }}>
               {todayVisible && <TodayLine left={percentageForDate(today, period.start, period.end)} />}
@@ -91,8 +93,9 @@ export function Timeline({ projects }: { projects: ProjectRecord[] }) {
         </div>
       </div>
 
-      {unscheduled.length > 0 && <section className="mt-5 border p-4" aria-labelledby="unscheduled-title"><h3 id="unscheduled-title" className="font-semibold">Unscheduled ({unscheduled.length})</h3><p className="mt-1 text-sm text-[var(--muted-foreground)]">These projects need a start date before they receive a timeline range.</p><div className="mt-3 flex flex-wrap gap-2">{unscheduled.map((project) => <span key={project.id} className="border bg-[var(--muted)] px-2 py-1 text-sm">{project.name}</span>)}</div></section>}
+      {unscheduled.length > 0 && <section className="mt-5 border p-4" aria-labelledby="unscheduled-title"><h3 id="unscheduled-title" className="font-semibold">Unscheduled ({unscheduled.length})</h3><p className="mt-1 text-sm text-[var(--muted-foreground)]">These projects need a start date before they receive a timeline range.</p><div className="mt-3 flex flex-wrap gap-2">{unscheduled.map((project) => <Button key={project.id} size="sm" variant="outline" onClick={() => setEditingId(project.id)}>{project.name}</Button>)}</div></section>}
       {rows.length === 0 && <p className="mt-5 border border-dashed p-5 text-sm text-[var(--muted-foreground)]">No projects match these filters.</p>}
+      <ProjectDrawer open={editingId !== null} project={projects.find((project) => project.id === editingId) ?? null} onClose={() => setEditingId(null)} />
     </section>
   );
 }
@@ -101,8 +104,8 @@ function TodayLine({ left }: { left: number }) {
   return <span aria-label="Today" className="pointer-events-none absolute inset-y-0 z-20 border-l-2 border-[var(--destructive)]" style={{ left: `${left}%` }} />;
 }
 
-function ProjectLabel({ project, metric }: { project: ProjectRecord; metric: string }) {
-  return <div className="flex h-20 flex-col justify-center border-b px-3"><span className="truncate text-sm font-medium">{project.name}</span><span className="mt-1 truncate text-xs text-[var(--muted-foreground)]">{metric} · Work {project.workProgress}%</span></div>;
+function ProjectLabel({ project, metric, onOpen }: { project: ProjectRecord; metric: string; onOpen: () => void }) {
+  return <div className="flex h-20 flex-col justify-center border-b px-3"><button type="button" className="truncate text-left text-sm font-medium underline-offset-4 hover:underline focus-visible:outline-2 focus-visible:outline-[var(--ring)]" onClick={onOpen}>{project.name}</button><span className="mt-1 truncate text-xs text-[var(--muted-foreground)]">{metric} · Work {project.workProgress}%</span></div>;
 }
 
 function TimelineRow({ project, timeline, visibleStart, visibleEnd }: { project: ProjectRecord; timeline: NonNullable<ReturnType<typeof timelineProject>>; visibleStart: string; visibleEnd: string }) {

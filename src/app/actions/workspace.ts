@@ -25,10 +25,12 @@ function ids(formData: FormData, childName?: string) {
   return { projectId, childId: childId as string | null };
 }
 
-async function run(action: () => void): Promise<ProjectActionResult> {
+async function run(formData: FormData, action: (projectId: string) => void): Promise<ProjectActionResult> {
   try {
-    action();
+    const { projectId } = ids(formData);
+    action(projectId);
     revalidatePath("/");
+    revalidatePath(`/projects/${projectId}`);
     return { ok: true };
   } catch (error) {
     return projectActionResult(error);
@@ -36,64 +38,61 @@ async function run(action: () => void): Promise<ProjectActionResult> {
 }
 
 export async function createTaskAction(formData: FormData) {
-  return run(() => {
-    const { projectId } = ids(formData);
+  return run(formData, (projectId) => {
     createTask(projectId, formData);
   });
 }
 
 export async function updateTaskAction(formData: FormData) {
-  return run(() => {
-    const { projectId, childId } = ids(formData, "taskId");
+  return run(formData, (projectId) => {
+    const { childId } = ids(formData, "taskId");
     updateTask(projectId, childId!, formData);
   });
 }
 
 export async function deleteTaskAction(formData: FormData) {
-  return run(() => {
-    const { projectId, childId } = ids(formData, "taskId");
+  return run(formData, (projectId) => {
+    const { childId } = ids(formData, "taskId");
     deleteTask(projectId, childId!);
   });
 }
 
 export async function createMilestoneAction(formData: FormData) {
-  return run(() => {
-    const { projectId } = ids(formData);
+  return run(formData, (projectId) => {
     createMilestone(projectId, formData);
   });
 }
 
 export async function toggleMilestoneAction(formData: FormData) {
-  return run(() => {
-    const { projectId, childId } = ids(formData, "milestoneId");
+  return run(formData, (projectId) => {
+    const { childId } = ids(formData, "milestoneId");
     toggleMilestone(projectId, childId!, formData.get("completed") === "true");
   });
 }
 
 export async function deleteMilestoneAction(formData: FormData) {
-  return run(() => {
-    const { projectId, childId } = ids(formData, "milestoneId");
+  return run(formData, (projectId) => {
+    const { childId } = ids(formData, "milestoneId");
     deleteMilestone(projectId, childId!);
   });
 }
 
 export async function createDocumentAction(formData: FormData) {
-  return run(() => {
-    const { projectId } = ids(formData);
+  return run(formData, (projectId) => {
     createDocument(projectId, formData);
   });
 }
 
 export async function updateDocumentAction(formData: FormData) {
-  return run(() => {
-    const { projectId, childId } = ids(formData, "documentId");
+  return run(formData, (projectId) => {
+    const { childId } = ids(formData, "documentId");
     updateDocument(projectId, childId!, formData);
   });
 }
 
 export async function deleteDocumentAction(formData: FormData) {
-  return run(() => {
-    const { projectId, childId } = ids(formData, "documentId");
+  return run(formData, (projectId) => {
+    const { childId } = ids(formData, "documentId");
     deleteDocument(projectId, childId!);
   });
 }

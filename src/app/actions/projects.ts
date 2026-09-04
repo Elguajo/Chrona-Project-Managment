@@ -14,6 +14,11 @@ import {
 import type { ProjectActionResult } from "@/lib/projects/types";
 import { PROJECT_STATUSES, type ProjectStatus } from "@/lib/projects/types";
 
+function revalidateProjectPaths(projectId: string) {
+  revalidatePath("/");
+  revalidatePath(`/projects/${projectId}`);
+}
+
 export async function createProjectAction(
   _previous: ProjectActionResult,
   formData: FormData,
@@ -37,7 +42,7 @@ export async function updateProjectAction(
       return { ok: false, error: "Project identifier is missing." };
     }
     await updateProject(projectId, formData);
-    revalidatePath("/");
+    revalidateProjectPaths(projectId);
     return { ok: true };
   } catch (error) {
     return projectActionResult(error);
@@ -49,7 +54,7 @@ export async function archiveProjectAction(formData: FormData): Promise<ProjectA
     const projectId = formData.get("projectId");
     if (typeof projectId !== "string" || !projectId) return { ok: false, error: "Project identifier is missing." };
     archiveProject(projectId);
-    revalidatePath("/");
+    revalidateProjectPaths(projectId);
     return { ok: true };
   } catch (error) {
     return projectActionResult(error);
@@ -61,7 +66,7 @@ export async function restoreProjectAction(formData: FormData): Promise<ProjectA
     const projectId = formData.get("projectId");
     if (typeof projectId !== "string" || !projectId) return { ok: false, error: "Project identifier is missing." };
     restoreProject(projectId);
-    revalidatePath("/");
+    revalidateProjectPaths(projectId);
     return { ok: true };
   } catch (error) {
     return projectActionResult(error);
@@ -76,7 +81,7 @@ export async function deleteProjectAction(formData: FormData): Promise<ProjectAc
       return { ok: false, error: "Project identifier or deletion confirmation is missing." };
     }
     permanentlyDeleteProject(projectId, confirmation);
-    revalidatePath("/");
+    revalidateProjectPaths(projectId);
     return { ok: true };
   } catch (error) {
     return projectActionResult(error);
@@ -95,7 +100,7 @@ export async function moveProjectAction(formData: FormData): Promise<ProjectActi
       return { ok: false, error: "The drop target is invalid." };
     }
     moveProject(projectId, toStatus as ProjectStatus, beforeProjectId);
-    revalidatePath("/");
+    revalidateProjectPaths(projectId);
     return { ok: true };
   } catch (error) {
     return projectActionResult(error);

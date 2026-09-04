@@ -26,10 +26,12 @@ import {
   type CoverMode,
   type LinkType,
   type ProjectActionResult,
+  type ProjectActivityRecord,
   type ProjectPriority,
   type ProjectRecord,
   type ProjectStatus,
   type ProjectType,
+  type ProjectWorkspaceRecord,
   type TaskStatus,
 } from "@/lib/projects/types";
 
@@ -584,6 +586,25 @@ export function getKanbanProjects(): ProjectRecord[] {
       if (leftOrder !== rightOrder) return leftOrder - rightOrder;
       return left.createdAt.localeCompare(right.createdAt);
     });
+}
+
+/**
+ * Reads one Project aggregate for the standalone workspace. The Project and
+ * its related records remain the same rows used by every portfolio view.
+ */
+export function getProjectWorkspace(projectId: string): ProjectWorkspaceRecord | null {
+  const project = getProjects().find((candidate) => candidate.id === projectId);
+  if (!project) return null;
+
+  const activity = getDatabase()
+    .select()
+    .from(projectActivity)
+    .where(eq(projectActivity.projectId, projectId))
+    .all()
+    .sort((left, right) => right.createdAt.localeCompare(left.createdAt) || right.id.localeCompare(left.id))
+    .map((event) => ({ ...event } satisfies ProjectActivityRecord));
+
+  return { project, activity };
 }
 
 export function projectActionResult(error: unknown): ProjectActionResult {

@@ -18,18 +18,18 @@ Provide a sortable portfolio table plus a drawer and full Project workspace for 
 ## Tasks
 
 - [x] Implement List projection and sorting from shared Project records.
-- [ ] Implement Project Drawer and full detail route.
-- [ ] Wire quick edits, links, activity, and consistent metric presentation.
-- [ ] Implement validated Task, Milestone, and Document workspace commands and their accessible controls.
-- [ ] Verify create/edit/move/progress transitions across all views.
+- [x] Implement Project Drawer and full detail route.
+- [x] Wire quick edits, links, activity, and consistent metric presentation.
+- [x] Implement validated Task, Milestone, and Document workspace commands and their accessible controls.
+- [x] Verify create/edit/move/progress transitions across all views.
 
 ## Acceptance criteria
 
 - [ ] List columns are sortable and show the same persisted values as Kanban and Timeline.
-- [ ] A project opened from any view has a usable drawer and full detail route.
-- [ ] Quick edits, links, and activity persist and are reflected in all projections.
-- [ ] Keyboard escape/focus and responsive drawer behaviour are usable.
-- [ ] A Task, Milestone, and Document added in a Project workspace survive reload and never appear under another Project.
+- [x] A project opened from any portfolio view has a usable drawer and full detail route.
+- [x] Quick edits, links, and activity persist and are reflected in all projections.
+- [ ] Keyboard escape/focus and responsive drawer behaviour are usable. Browser smoke remains pending because local Chromium is unavailable.
+- [x] A Task, Milestone, and Document added in a Project workspace survive reload and never appear under another Project.
 
 ## Verification
 
@@ -41,3 +41,10 @@ Implemented early: 2026-09-03
 
 - The List projects the same Project records with search, status/type/priority filters, sortable columns, Task completion counts, and the shared Project drawer/workspace.
 - The Project workspace supports local Task, Milestone, and Document mutation, but the standalone `/projects/[id]` route remains pending.
+
+Implemented: 2026-09-04
+
+- `/projects/[id]` reads the same Project aggregate as List, Kanban, Timeline, and the drawer; it adds no view-owned records.
+- The route presents status, dates, Work Progress, derived Time Progress, project schedule/milestones, links, Task/Milestone/Document controls, and activity.
+- Project and workspace server actions revalidate both the portfolio and the owning standalone route. Domain coverage verifies the standalone aggregate's ownership and activity; production HTTP smoke rendered the portfolio, populated workspace route, and missing-project 404 against a fresh temporary SQLite database.
+- Full keyboard/drag browser smoke remains pending: no local Playwright Chromium executable was available, and no browser was downloaded.

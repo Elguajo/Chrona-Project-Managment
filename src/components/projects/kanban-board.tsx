@@ -3,6 +3,7 @@
 import { useActionState, useEffect, useMemo, useRef, useState } from "react";
 import { Archive, ArchiveRestore, GripVertical, Plus, Search, Trash2, X } from "lucide-react";
 import { useRouter } from "next/navigation";
+import Link from "next/link";
 
 import {
   archiveProjectAction,
@@ -322,6 +323,7 @@ export function ProjectDrawer({ open, project, onClose }: { open: boolean; proje
           </div>
           <Button type="button" variant="ghost" size="icon" onClick={onClose} aria-label="Close project drawer"><X aria-hidden="true" /></Button>
         </div>
+        {project && <Link href={`/projects/${project.id}`} className="mt-5 inline-flex text-sm font-medium text-[var(--accent)] underline-offset-4 hover:underline">Open full workspace</Link>}
         <ProjectForm key={project?.id ?? "new"} project={project} onSaved={onClose} />
         {project && <><ProjectWorkspace project={project} /><ProjectLifecycleActions project={project} onComplete={onClose} /></>}
       </div>
@@ -329,7 +331,7 @@ export function ProjectDrawer({ open, project, onClose }: { open: boolean; proje
   );
 }
 
-function ProjectForm({ project, onSaved }: { project: ProjectRecord | null; onSaved: () => void }) {
+export function ProjectForm({ project, onSaved }: { project: ProjectRecord | null; onSaved: () => void }) {
   const router = useRouter();
   const [state, formAction, pending] = useActionState(project ? updateProjectAction : createProjectAction, INITIAL_ACTION_STATE);
 

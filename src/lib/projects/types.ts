@@ -72,6 +72,14 @@ export type ProjectDocumentRecord = {
   updatedAt: string;
 };
 
+export type ProjectActivityRecord = {
+  id: string;
+  projectId: string;
+  type: string;
+  metadataJson: string;
+  createdAt: string;
+};
+
 export type ProjectRecord = {
   id: string;
   name: string;
@@ -97,6 +105,11 @@ export type ProjectRecord = {
   tasks: ProjectTaskRecord[];
   milestones: ProjectMilestoneRecord[];
   documents: ProjectDocumentRecord[];
+};
+
+export type ProjectWorkspaceRecord = {
+  project: ProjectRecord;
+  activity: ProjectActivityRecord[];
 };
 
 export type ProjectActionResult = {
