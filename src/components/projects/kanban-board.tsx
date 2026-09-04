@@ -317,7 +317,7 @@ export function ProjectDrawer({ open, project, templates = [], onClose }: { open
   return (
     <dialog
       ref={dialogRef}
-      className="m-0 ml-auto h-svh w-full max-w-xl border-l bg-[var(--background)] p-0 text-[var(--foreground)] shadow-2xl backdrop:bg-black/45"
+      className="m-0 ml-auto h-dvh w-screen max-w-none overflow-hidden border-l bg-[var(--background)] p-0 text-[var(--foreground)] shadow-2xl backdrop:bg-black/45 sm:h-svh sm:w-full sm:max-w-xl"
       aria-labelledby="project-drawer-title"
       onClose={onClose}
       onCancel={(event) => { event.preventDefault(); onClose(); }}
