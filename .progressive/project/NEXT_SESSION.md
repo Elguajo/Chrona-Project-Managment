@@ -14,7 +14,7 @@ Verified foundation commands: `pnpm check:database`, `pnpm typecheck`, `pnpm lin
 
 Verified Phase 02 commands: `pnpm test:domain`, `pnpm check:database`, `pnpm typecheck`, `pnpm lint`, `pnpm build`, `pnpm db:migrate`, and a production runtime smoke request. The domain migration is `drizzle/0001_wandering_smiling_tiger.sql`.
 
-Verified Phase 03 commands: `pnpm test:domain`, `pnpm check:database`, `pnpm typecheck`, `pnpm lint`, `pnpm build`, a temporary `pnpm db:migrate`, and a production HTTP smoke. Local Microsoft Edge browser QA through Playwright Core observed native HTML5 `dragstart`/`drop` reorder and cross-column status movement, `Move to…` completion/reopening, lifecycle persistence, and reload persistence on an isolated temporary SQLite database. No browser was downloaded.
+Verified Phase 03 commands: `pnpm test:domain`, `pnpm check:database`, `pnpm typecheck`, `pnpm lint`, `pnpm build`, a temporary `pnpm db:migrate`, and a production HTTP smoke. Local Microsoft Edge browser QA through Playwright Core observed native HTML5 `dragstart`/`drop` reorder and cross-column status movement, `Move to…` completion/reopening, lifecycle persistence, search/priority/type filtering, and reload persistence on an isolated temporary SQLite database. No browser was downloaded.
 
 Verified Project workspace expansion: `pnpm db:generate` created `drizzle/0002_sticky_redwing.sql`; `pnpm test:domain`, `pnpm check:database`, `pnpm typecheck`, `pnpm lint`, and `pnpm build` passed. The domain test covers Task completion, Milestone completion, local Document editing, ownership rejection, direct child deletion, and project cascading deletion.
 

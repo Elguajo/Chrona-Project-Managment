@@ -54,4 +54,5 @@ Completed browser verification: 2026-09-04
 - A production Next.js server backed by an isolated temporary SQLite database with realistic fixtures was exercised in local Microsoft Edge through Playwright Core, using the system Edge executable rather than downloading Chromium.
 - Native pointer drags emitted observed HTML5 `dragstart` and `drop` events for same-column reorder and a cross-column status move. Both persisted through reload.
 - The native `Move to…` control completed and then reopened a Project through reload. The temporary database recorded `completedAt` on completion, cleared it on reopening, and retained both lifecycle history entries.
+- Search plus priority and type filters reduced the shared card projection to the expected Project records before the persisted status/order reload checks.
 - Browser console errors were empty after the interaction suite.
