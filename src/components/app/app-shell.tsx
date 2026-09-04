@@ -1,6 +1,6 @@
 "use client";
 
-import { Database, LayoutDashboard, LayoutTemplate, List, PanelTop, Settings2, SquaresUnite } from "lucide-react";
+import { CalendarDays, Database, LayoutDashboard, LayoutTemplate, List, PanelTop, Settings2, SquaresUnite } from "lucide-react";
 import { useState } from "react";
 
 import { Button } from "@/components/ui/button";
@@ -9,6 +9,7 @@ import { ProjectDashboard } from "@/components/projects/dashboard";
 import { ProjectList } from "@/components/projects/project-list";
 import { TemplatesPanel } from "@/components/projects/templates-panel";
 import { Timeline } from "@/components/projects/timeline";
+import { ProjectCalendar } from "@/components/projects/calendar";
 import { QuickAdd } from "@/components/app/quick-add";
 import type { ProjectRecord, ProjectTemplateRecord } from "@/lib/projects/types";
 
@@ -21,6 +22,7 @@ const navigationItems = [
   { label: "Dashboard", icon: SquaresUnite, view: "dashboard" },
   { label: "Kanban", icon: PanelTop, view: "kanban" },
   { label: "Timeline", icon: LayoutDashboard, view: "timeline" },
+  { label: "Calendar", icon: CalendarDays, view: "calendar" },
   { label: "List", icon: List, view: "list" },
   { label: "Templates", icon: LayoutTemplate, view: "templates" },
 ] as const;
@@ -78,7 +80,7 @@ export function AppShell({ projects, templates }: AppShellProps) {
           ))}
         </nav>
 
-        {view === "dashboard" ? <ProjectDashboard projects={projects} /> : view === "kanban" ? <KanbanBoard projects={projects} templates={templates} /> : view === "timeline" ? <Timeline projects={projects} /> : view === "list" ? <ProjectList projects={projects} /> : <TemplatesPanel templates={templates} />}
+        {view === "dashboard" ? <ProjectDashboard projects={projects} /> : view === "kanban" ? <KanbanBoard projects={projects} templates={templates} /> : view === "timeline" ? <Timeline projects={projects} /> : view === "calendar" ? <ProjectCalendar projects={projects} /> : view === "list" ? <ProjectList projects={projects} /> : <TemplatesPanel templates={templates} />}
       </main>
     </div>
   );

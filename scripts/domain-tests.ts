@@ -57,6 +57,7 @@ async function main() {
     const { createDocument, createMilestone, createTask, deleteDocument, deleteMilestone, deleteTask, toggleMilestone, updateDocument, updateTask } = await import("../src/lib/workspace/server");
     const { createProjectFromTemplate, createTemplate, deleteTemplate, getProjectTemplates, updateTemplate } = await import("../src/lib/templates/server");
     const { clippedRange, dateRange, periodFor, shiftPeriod, timelineProject } = await import("../src/lib/timeline/date");
+    const { calendarDates, calendarItems, calendarPeriod, filterCalendarItems, shiftCalendarPeriod } = await import("../src/lib/calendar/calendar");
 
     await createProject(projectForm());
     const created = getProjects();
@@ -123,6 +124,11 @@ async function main() {
     assert.equal(projectTiming?.displayEnd, "2026-02-20");
     assert.equal(projectTiming?.metrics.overdueDays, 10);
     assert.deepEqual(clippedRange("2026-02-01", "2026-02-28", month.start, month.end), { left: 0, width: 100 });
+    const calendarMonth = calendarPeriod("2026-02-18", "month");
+    assert.deepEqual(calendarMonth, { start: "2026-01-26", end: "2026-03-01" });
+    assert.equal(calendarDates(calendarMonth).length, 35);
+    assert.deepEqual(calendarPeriod("2026-02-18", "week"), { start: "2026-02-16", end: "2026-02-22" });
+    assert.equal(shiftCalendarPeriod("2026-01-31", "month", 1), "2026-02-28");
 
     for (const status of PROJECT_STATUSES) {
       await createProject(projectForm({ name: `Status ${status}`, status }));
@@ -141,6 +147,24 @@ async function main() {
     const activeKanbanProjects = getKanbanProjects().filter((project) => project.status === "active");
     assert.deepEqual(activeKanbanProjects.slice(0, 2).map((project) => project.id), [orderedProject.id, created[0].id]);
     assert.ok(activeKanbanProjects[0].sortOrder !== null);
+
+    const calendarProject = getProjects().find((project) => project.id === orderedProject.id)!;
+    const calendarTask = new FormData();
+    calendarTask.set("title", "Calendar task"); calendarTask.set("status", "in_progress"); calendarTask.set("dueDate", "2026-02-11");
+    createTask(calendarProject.id, calendarTask);
+    const completedCalendarTask = new FormData();
+    completedCalendarTask.set("title", "Finished calendar task"); completedCalendarTask.set("status", "done"); completedCalendarTask.set("dueDate", "2026-02-11");
+    createTask(calendarProject.id, completedCalendarTask);
+    const calendarMilestone = new FormData();
+    calendarMilestone.set("title", "Calendar milestone"); calendarMilestone.set("targetDate", "2026-02-12");
+    createMilestone(calendarProject.id, calendarMilestone);
+    const calendarAggregate = calendarItems(getProjects());
+    assert.ok(calendarAggregate.some((item) => item.kind === "project" && item.projectId === calendarProject.id && item.date === "2026-02-10"));
+    assert.ok(calendarAggregate.some((item) => item.kind === "task" && item.title === "Calendar task"));
+    assert.equal(calendarAggregate.some((item) => item.title === "Finished calendar task"), false);
+    assert.ok(calendarAggregate.some((item) => item.kind === "milestone" && item.title === "Calendar milestone"));
+    assert.deepEqual(filterCalendarItems(calendarAggregate, { kind: "task", projectStatus: "", query: "calendar" }).map((item) => item.title), ["Calendar task"]);
+    assert.deepEqual(filterCalendarItems(calendarAggregate, { kind: "", projectStatus: "active", query: "milestone" }).map((item) => item.title), ["Calendar milestone"]);
 
     moveProject(created[0].id, "completed", null);
     let movedProject = getProjects().find((project) => project.id === created[0].id);
