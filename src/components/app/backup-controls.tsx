@@ -8,12 +8,12 @@ import { Button } from "@/components/ui/button";
 
 export function BackupControls() {
   const inputRef = useRef<HTMLInputElement>(null);
-  const [message, setMessage] = useState<string | null>(null);
+  const [feedback, setFeedback] = useState<{ text: string; isError: boolean } | null>(null);
   const [busy, setBusy] = useState(false);
   const router = useRouter();
 
   async function exportBackup() {
-    setBusy(true); setMessage(null);
+    setBusy(true); setFeedback(null);
     try {
       const response = await fetch("/api/backup");
       if (!response.ok) throw new Error("Could not create a backup.");
@@ -22,15 +22,15 @@ export function BackupControls() {
       const link = document.createElement("a");
       link.href = url; link.download = `local-project-os-backup-${new Date().toISOString().slice(0, 10)}.json`;
       document.body.append(link); link.click(); link.remove(); URL.revokeObjectURL(url);
-      setMessage("Backup downloaded.");
+      setFeedback({ text: "Backup downloaded.", isError: false });
     } catch (error) {
-      setMessage(error instanceof Error ? error.message : "Could not create a backup.");
+      setFeedback({ text: error instanceof Error ? error.message : "Could not create a backup.", isError: true });
     } finally { setBusy(false); }
   }
 
   async function importBackup(file: File) {
     if (!window.confirm("Replace all local projects, workspace records, templates, settings, and cover assets with this backup? This cannot be undone.")) return;
-    setBusy(true); setMessage(null);
+    setBusy(true); setFeedback(null);
     try {
       const response = await fetch("/api/backup", { method: "POST", headers: { "Content-Type": "application/json" }, body: await file.text() });
       const result: unknown = await response.json();
@@ -38,10 +38,10 @@ export function BackupControls() {
         const error = typeof result === "object" && result !== null && typeof (result as { error?: unknown }).error === "string" ? (result as { error: string }).error : "The backup could not be restored. Your existing data was not changed.";
         throw new Error(error);
       }
-      setMessage("Backup restored. Reloading local data.");
+      setFeedback({ text: "Backup restored. Reloading local data.", isError: false });
       router.refresh();
     } catch (error) {
-      setMessage(error instanceof Error ? error.message : "The backup could not be restored. Your existing data was not changed.");
+      setFeedback({ text: error instanceof Error ? error.message : "The backup could not be restored. Your existing data was not changed.", isError: true });
     } finally { setBusy(false); if (inputRef.current) inputRef.current.value = ""; }
   }
 
@@ -49,6 +49,6 @@ export function BackupControls() {
     <Button variant="outline" size="sm" disabled={busy} onClick={() => void exportBackup()}><Download aria-hidden="true" /> Export backup</Button>
     <Button variant="outline" size="sm" disabled={busy} onClick={() => inputRef.current?.click()}><Upload aria-hidden="true" /> Import backup</Button>
     <input ref={inputRef} className="sr-only" type="file" accept="application/json,.json" aria-label="Choose a JSON backup file" onChange={(event) => { const file = event.target.files?.[0]; if (file) void importBackup(file); }} />
-    {message && <p role="status" className="basis-full text-right text-xs text-[var(--muted-foreground)]">{message}</p>}
+    {feedback && <p role={feedback.isError ? "alert" : "status"} className={`basis-full text-right text-xs ${feedback.isError ? "text-[var(--destructive)]" : "text-[var(--muted-foreground)]"}`}>{feedback.text}</p>}
   </div>;
 }
