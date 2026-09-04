@@ -5,6 +5,7 @@ import { useMemo, useState } from "react";
 
 import { Button } from "@/components/ui/button";
 import { ProjectDrawer } from "@/components/projects/kanban-board";
+import { matchesProjectSearch } from "@/lib/projects/search";
 import { PROJECT_PRIORITIES, PROJECT_STATUSES, PROJECT_TYPES, type ProjectRecord } from "@/lib/projects/types";
 
 type SortKey = "name" | "status" | "deadline" | "progress" | "updated";
@@ -31,10 +32,8 @@ export function ProjectList({ projects }: { projects: ProjectRecord[] }) {
   const [editingId, setEditingId] = useState<string | null>(null);
   const selected = projects.find((project) => project.id === editingId) ?? null;
   const visible = useMemo(() => {
-    const lowered = query.trim().toLocaleLowerCase();
     return projects.filter((project) => !project.archivedAt).filter((project) => {
-      const haystack = [project.name, project.clientName, project.description, ...project.tags].filter(Boolean).join(" ").toLocaleLowerCase();
-      return (!lowered || haystack.includes(lowered)) && (!status || project.status === status) && (!type || project.type === type) && (!priority || project.priority === priority);
+      return matchesProjectSearch(project, query) && (!status || project.status === status) && (!type || project.type === type) && (!priority || project.priority === priority);
     }).sort((left, right) => {
       const result = sortValue(left, sort).localeCompare(sortValue(right, sort));
       return descending ? -result : result;
@@ -49,7 +48,7 @@ export function ProjectList({ projects }: { projects: ProjectRecord[] }) {
   return <section className="mt-8" aria-labelledby="list-title">
     <div className="border-b pb-5"><p className="text-sm font-medium text-[var(--accent)]">Portfolio data</p><h2 id="list-title" className="mt-1 text-2xl font-semibold tracking-tight">List</h2><p className="mt-1 text-sm text-[var(--muted-foreground)]">Sort, filter, and open a Project without making a view-specific copy.</p></div>
     <div className="mt-5 grid gap-3 md:grid-cols-[minmax(16rem,1fr)_10rem_10rem_10rem]">
-      <label className="relative block"><span className="sr-only">Search projects</span><Search className="pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2 text-[var(--muted-foreground)]" aria-hidden="true" /><input className="field pl-9" type="search" value={query} onChange={(event) => setQuery(event.target.value)} placeholder="Search projects, clients, or tags" /></label>
+      <label className="relative block"><span className="sr-only">Search local projects, work, tags, or links</span><Search className="pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2 text-[var(--muted-foreground)]" aria-hidden="true" /><input className="field pl-9" type="search" value={query} onChange={(event) => setQuery(event.target.value)} placeholder="Search projects, work, tags, or links" /></label>
       <label><span className="sr-only">Filter by status</span><select className="field" value={status} onChange={(event) => setStatus(event.target.value)}><option value="">All statuses</option>{PROJECT_STATUSES.map((value) => <option key={value} value={value}>{displayLabel(value)}</option>)}</select></label>
       <label><span className="sr-only">Filter by type</span><select className="field" value={type} onChange={(event) => setType(event.target.value)}><option value="">All types</option>{PROJECT_TYPES.map((value) => <option key={value} value={value}>{displayLabel(value)}</option>)}</select></label>
       <label><span className="sr-only">Filter by priority</span><select className="field" value={priority} onChange={(event) => setPriority(event.target.value)}><option value="">All priorities</option>{PROJECT_PRIORITIES.map((value) => <option key={value} value={value}>{displayLabel(value)}</option>)}</select></label>

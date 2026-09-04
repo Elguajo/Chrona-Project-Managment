@@ -59,6 +59,7 @@ async function main() {
     const { clippedRange, dateRange, periodFor, shiftPeriod, timelineProject } = await import("../src/lib/timeline/date");
     const { TIMELINE_MAX_PIXELS_PER_DAY, TIMELINE_MIN_PIXELS_PER_DAY, clampPixelsPerDay, extendTimelineRange, fitTimelineViewport, shiftTimelineCenter, timelineDateAtOffset, timelineRangeForDates, timelineTickDates, timelineTickMode, zoomScrollLeft } = await import("../src/lib/timeline/viewport");
     const { calendarDates, calendarItems, calendarPeriod, filterCalendarItems, shiftCalendarPeriod } = await import("../src/lib/calendar/calendar");
+    const { matchesProjectSearch } = await import("../src/lib/projects/search");
 
     await createProject(projectForm());
     const created = getProjects();
@@ -318,6 +319,18 @@ async function main() {
     assert.equal(clonedProject.milestones.find((milestone) => milestone.title === "Final handoff")?.targetDate, "2026-04-22");
     assert.equal(clonedProject.deadline, "2026-04-22");
     assert.ok(getProjectWorkspace(cloneId)?.activity.some((event) => event.type === "created_from_template"));
+    assert.ok(clonedProject.tasks.every((task) => task.projectId === cloneId));
+    assert.ok(clonedProject.milestones.every((milestone) => milestone.projectId === cloneId));
+    assert.ok(clonedProject.documents.every((document) => document.projectId === cloneId));
+
+    // Regression: portfolio view search must include the entire locally loaded
+    // Project aggregate, rather than only top-level Project fields and tags.
+    assert.equal(matchesProjectSearch(clonedProject, "Prepare delivery plan"), true);
+    assert.equal(matchesProjectSearch(clonedProject, "Final handoff"), true);
+    assert.equal(matchesProjectSearch(clonedProject, "Project brief"), true);
+    assert.equal(matchesProjectSearch(clonedProject, "delivery"), true);
+    assert.equal(matchesProjectSearch(created[0], "Design file"), true);
+    assert.equal(matchesProjectSearch(created[0], "example.com/design"), true);
 
     await expectValidation(() => createProjectFromTemplate(clientTemplate.id, projectForm({ name: "Invalid delivery", startDate: "2026-04-01", deadline: "2026-04-10" })));
     assert.equal(database.select().from(projects).all().length, beforeTemplateProjectCount + 1);

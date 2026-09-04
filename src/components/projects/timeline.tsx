@@ -5,6 +5,7 @@ import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState, typ
 
 import { ProjectDrawer } from "@/components/projects/kanban-board";
 import { Button } from "@/components/ui/button";
+import { matchesProjectSearch } from "@/lib/projects/search";
 import { clippedRange, localToday, percentageForDate, timelineProject } from "@/lib/timeline/date";
 import {
   TIMELINE_RANGE_BUFFER_DAYS,
@@ -88,10 +89,8 @@ export function Timeline({ projects, viewport, onViewportChange }: TimelineProps
     }), [projects, today]);
   const [range, setRange] = useState<TimelineRange>(() => timelineRangeForDates(scheduledProjectDates, today));
   const rows = useMemo(() => {
-    const lowered = query.trim().toLocaleLowerCase();
     return projects.filter((project) => !project.archivedAt).filter((project) => {
-      const haystack = [project.name, project.clientName, project.description, ...project.tags].filter(Boolean).join(" ").toLocaleLowerCase();
-      return (!lowered || haystack.includes(lowered)) && (!status || project.status === status) && (!type || project.type === type);
+      return matchesProjectSearch(project, query) && (!status || project.status === status) && (!type || project.type === type);
     });
   }, [projects, query, status, type]);
   const scheduled = rows.map((project) => ({ project, timeline: timelineProject(project, today) })).filter((item): item is { project: ProjectRecord; timeline: NonNullable<ReturnType<typeof timelineProject>> } => Boolean(item.timeline));
@@ -317,7 +316,7 @@ export function Timeline({ projects, viewport, onViewportChange }: TimelineProps
       </div>
 
       <div className="mt-5 grid gap-3 md:grid-cols-[minmax(16rem,1fr)_11rem_11rem]" aria-label="Timeline filters">
-        <label className="relative block"><span className="sr-only">Search projects</span><Search className="pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2 text-[var(--muted-foreground)]" aria-hidden="true" /><input className="field pl-9" type="search" value={query} onChange={(event) => setQuery(event.target.value)} placeholder="Search projects, clients, or tags" /></label>
+        <label className="relative block"><span className="sr-only">Search local projects, work, tags, or links</span><Search className="pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2 text-[var(--muted-foreground)]" aria-hidden="true" /><input className="field pl-9" type="search" value={query} onChange={(event) => setQuery(event.target.value)} placeholder="Search projects, work, tags, or links" /></label>
         <label><span className="sr-only">Filter by status</span><select className="field" value={status} onChange={(event) => setStatus(event.target.value)}><option value="">All statuses</option>{PROJECT_STATUSES.map((value) => <option key={value} value={value}>{displayLabel(value)}</option>)}</select></label>
         <label><span className="sr-only">Filter by project type</span><select className="field" value={type} onChange={(event) => setType(event.target.value)}><option value="">All types</option>{PROJECT_TYPES.map((value) => <option key={value} value={value}>{displayLabel(value)}</option>)}</select></label>
       </div>

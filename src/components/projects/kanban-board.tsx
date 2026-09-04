@@ -14,6 +14,7 @@ import {
   updateProjectAction,
 } from "@/app/actions/projects";
 import { Button } from "@/components/ui/button";
+import { matchesProjectSearch } from "@/lib/projects/search";
 import { ProjectWorkspace } from "@/components/projects/project-workspace";
 import {
   COVER_MODES,
@@ -91,13 +92,8 @@ export function KanbanBoard({ projects, templates = [] }: KanbanBoardProps) {
   const archivedProjects = useMemo(() => boardProjects.filter((project) => project.archivedAt), [boardProjects]);
 
   const visibleProjects = useMemo(() => {
-    const query = search.trim().toLocaleLowerCase();
     return activeProjects.filter((project) => {
-      const haystack = [project.name, project.clientName, project.description, ...project.tags]
-        .filter(Boolean)
-        .join(" ")
-        .toLocaleLowerCase();
-      return (!query || haystack.includes(query))
+      return matchesProjectSearch(project, search)
         && (!priority || project.priority === priority)
         && (!type || project.type === type);
     });
@@ -150,9 +146,9 @@ export function KanbanBoard({ projects, templates = [] }: KanbanBoardProps) {
 
       <div className="mt-5 grid gap-3 md:grid-cols-[minmax(16rem,1fr)_11rem_11rem]" aria-label="Kanban filters">
         <label className="relative block">
-          <span className="sr-only">Search projects</span>
+          <span className="sr-only">Search local projects, work, tags, or links</span>
           <Search className="pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2 text-[var(--muted-foreground)]" aria-hidden="true" />
-          <input className="field pl-9" type="search" value={search} onChange={(event) => setSearch(event.target.value)} placeholder="Search projects, clients, or tags" />
+          <input className="field pl-9" type="search" value={search} onChange={(event) => setSearch(event.target.value)} placeholder="Search projects, work, tags, or links" />
         </label>
         <label className="grid gap-1 text-sm font-medium">
           <span className="sr-only">Filter by priority</span>
