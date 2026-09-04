@@ -11,6 +11,7 @@ import { TemplatesPanel } from "@/components/projects/templates-panel";
 import { Timeline } from "@/components/projects/timeline";
 import { ProjectCalendar } from "@/components/projects/calendar";
 import { QuickAdd } from "@/components/app/quick-add";
+import { BackupControls } from "@/components/app/backup-controls";
 import type { ProjectRecord, ProjectTemplateRecord } from "@/lib/projects/types";
 import { localToday } from "@/lib/timeline/date";
 import { TIMELINE_DEFAULT_PIXELS_PER_DAY, type TimelineViewportState } from "@/lib/timeline/viewport";
@@ -48,7 +49,7 @@ export function AppShell({ projects, templates }: AppShellProps) {
             <p className="text-xs text-[var(--muted-foreground)]">Single-owner workspace</p>
           </div>
         </div>
-        <div className="flex items-center gap-2"><QuickAdd projects={projects} templates={templates} /><Button variant="outline" size="sm" disabled aria-label="Settings arrive in a later phase"><Settings2 className="size-4" aria-hidden="true" />Settings</Button></div>
+        <div className="flex flex-wrap items-center justify-end gap-2"><BackupControls /><QuickAdd projects={projects} templates={templates} /><Button variant="outline" size="sm" disabled aria-label="Settings arrive in a later phase"><Settings2 className="size-4" aria-hidden="true" />Settings</Button></div>
       </header>
 
       <main className="w-full px-5 py-8 sm:px-8">

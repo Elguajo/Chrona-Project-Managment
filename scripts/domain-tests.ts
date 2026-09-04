@@ -321,6 +321,28 @@ async function main() {
 
     await expectValidation(() => createProjectFromTemplate(clientTemplate.id, projectForm({ name: "Invalid delivery", startDate: "2026-04-01", deadline: "2026-04-10" })));
     assert.equal(database.select().from(projects).all().length, beforeTemplateProjectCount + 1);
+
+    const { BackupValidationError, createBackup, restoreBackup } = await import("../src/lib/backup/server");
+    const backup = createBackup();
+    const backupProjectCount = database.select().from(projects).all().length;
+    const backupTaskCount = database.select().from(projectTasks).all().length;
+    assert.ok(backup.data.projectStatusHistory.length > 0);
+    assert.ok(backup.data.projectDocuments.length > 0);
+    database.delete(projects).run();
+    assert.equal(database.select().from(projects).all().length, 0);
+    restoreBackup(backup);
+    assert.equal(database.select().from(projects).all().length, backupProjectCount);
+    assert.equal(database.select().from(projectTasks).all().length, backupTaskCount);
+    assert.equal(getProjects().find((project) => project.id === cloneId)?.documents.length, clientTemplate.documents.length);
+    const incompatibleBackup = structuredClone(backup) as { version: number };
+    incompatibleBackup.version = 999;
+    assert.throws(() => restoreBackup(incompatibleBackup), BackupValidationError);
+    assert.equal(database.select().from(projects).all().length, backupProjectCount);
+    const malformedRelation = structuredClone(backup) as { data: { projectTasks: Array<{ projectId: string }> } };
+    malformedRelation.data.projectTasks[0]!.projectId = "missing-project";
+    assert.throws(() => restoreBackup(malformedRelation), BackupValidationError);
+    assert.equal(database.select().from(projects).all().length, backupProjectCount);
+
     deleteTemplate(personalTemplateId);
     assert.equal(database.select().from(projectTemplates).where(eq(projectTemplates.id, personalTemplateId)).all().length, 0);
 
