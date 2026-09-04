@@ -9,6 +9,5 @@ export default function Home() {
   const projects = getProjects();
   const templates = getProjectTemplates();
 
-  const projectRevision = projects.map((project) => `${project.id}:${project.updatedAt}`).join("|");
-  return <AppShell key={projectRevision} projects={projects} templates={templates} />;
+  return <AppShell projects={projects} templates={templates} />;
 }
