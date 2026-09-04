@@ -38,7 +38,7 @@ import {
 const MAX_IMAGE_BYTES = 5 * 1024 * 1024;
 const MAX_TAGS = 20;
 
-type ProjectInput = {
+export type ProjectInput = {
   name: string;
   description: string | null;
   type: ProjectType | null;
@@ -53,6 +53,13 @@ type ProjectInput = {
   tagNames: string[];
   link: { type: LinkType; title: string; url: string } | null;
   coverImage: File | null;
+};
+
+export type ProjectWorkspaceSeed = {
+  tasks: Array<{ title: string; detail: string | null; status: TaskStatus; dueDate: string | null }>;
+  milestones: Array<{ title: string; targetDate: string }>;
+  documents: Array<{ title: string; content: string }>;
+  activity?: { type: string; metadata: Record<string, unknown> };
 };
 
 type ProjectWriteDatabase = Pick<ReturnType<typeof getDatabase>, "delete" | "insert" | "select" | "update">;
@@ -334,7 +341,10 @@ function projectValues(input: ProjectInput, eventTime: string, coverImagePath: s
 }
 
 export async function createProject(formData: FormData) {
-  const input = parseProjectInput(formData);
+  return createProjectFromInput(parseProjectInput(formData));
+}
+
+export async function createProjectFromInput(input: ProjectInput, workspaceSeed?: ProjectWorkspaceSeed) {
   if (input.coverMode === "image" && !input.coverImage) {
     throw new ProjectValidationError("Choose a local image when cover mode is image.");
   }
@@ -357,6 +367,26 @@ export async function createProject(formData: FormData) {
       }).run();
       replaceProjectRelations(transaction, id, input, eventTime);
       addActivity(transaction, id, "created", eventTime, { status: input.status });
+      for (const [index, task] of (workspaceSeed?.tasks ?? []).entries()) {
+        transaction.insert(projectTasks).values({
+          id: randomUUID(), projectId: id, ...task,
+          completedAt: task.status === "done" ? eventTime : null,
+          sortOrder: (index + 1) * ORDER_GAP,
+          createdAt: eventTime,
+          updatedAt: eventTime,
+        }).run();
+      }
+      for (const milestone of workspaceSeed?.milestones ?? []) {
+        transaction.insert(projectMilestones).values({
+          id: randomUUID(), projectId: id, ...milestone, completedAt: null, createdAt: eventTime, updatedAt: eventTime,
+        }).run();
+      }
+      for (const document of workspaceSeed?.documents ?? []) {
+        transaction.insert(projectDocuments).values({
+          id: randomUUID(), projectId: id, ...document, createdAt: eventTime, updatedAt: eventTime,
+        }).run();
+      }
+      if (workspaceSeed?.activity) addActivity(transaction, id, workspaceSeed.activity.type, eventTime, workspaceSeed.activity.metadata);
       if (input.status === "completed") addActivity(transaction, id, "completed", eventTime);
       if (input.status === "cancelled") addActivity(transaction, id, "cancelled", eventTime);
     });
@@ -364,6 +394,7 @@ export async function createProject(formData: FormData) {
     removeCoverImage(coverImagePath);
     throw error;
   }
+  return id;
 }
 
 export async function updateProject(projectId: string, formData: FormData) {

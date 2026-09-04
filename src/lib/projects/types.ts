@@ -116,3 +116,61 @@ export type ProjectActionResult = {
   ok: boolean;
   error?: string;
 };
+
+export type ProjectTemplateTaskRecord = {
+  id: string;
+  templateId: string;
+  title: string;
+  detail: string | null;
+  status: TaskStatus;
+  dueOffsetDays: number | null;
+  sortOrder: number;
+};
+
+export type ProjectTemplateMilestoneRecord = {
+  id: string;
+  templateId: string;
+  title: string;
+  targetOffsetDays: number;
+  sortOrder: number;
+};
+
+export type ProjectTemplateDocumentRecord = {
+  id: string;
+  templateId: string;
+  title: string;
+  content: string;
+  sortOrder: number;
+};
+
+export type ProjectTemplateRecord = {
+  id: string;
+  name: string;
+  description: string | null;
+  type: ProjectType | null;
+  status: ProjectStatus;
+  priority: ProjectPriority | null;
+  color: string | null;
+  isStarter: boolean;
+  createdAt: string;
+  updatedAt: string;
+  tags: string[];
+  tasks: ProjectTemplateTaskRecord[];
+  milestones: ProjectTemplateMilestoneRecord[];
+  documents: ProjectTemplateDocumentRecord[];
+  requiresStartDate: boolean;
+  maxOffsetDays: number | null;
+};
+
+export type ProjectTemplateDraft = {
+  name: string;
+  description: string;
+  type: ProjectType | "";
+  status: ProjectStatus;
+  priority: ProjectPriority | "";
+  color: string;
+  tags: string;
+  tasks: Array<{ title: string; detail: string; status: TaskStatus; dueOffsetDays: number | null }>;
+  milestones: Array<{ title: string; targetOffsetDays: number }>;
+  documents: Array<{ title: string; content: string }>;
+};

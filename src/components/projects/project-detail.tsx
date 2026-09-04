@@ -16,6 +16,7 @@ function displayLabel(value: string) {
 function activityLabel(activity: ProjectActivityRecord) {
   const labels: Record<string, string> = {
     created: "Project created",
+    created_from_template: "Project created from template",
     archived: "Project archived",
     restored: "Project restored",
     completed: "Project completed",

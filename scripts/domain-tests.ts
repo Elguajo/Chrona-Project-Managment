@@ -37,7 +37,7 @@ async function expectValidation(operation: () => Promise<unknown>) {
 async function main() {
   try {
     const { getDatabase } = await import("../src/lib/db/connection");
-    const { projectActivity, projectDocuments, projectLinks, projectMilestones, projectStatusHistory, projectTags, projectTasks, projects } = await import(
+    const { projectActivity, projectDocuments, projectLinks, projectMilestones, projectStatusHistory, projectTags, projectTasks, projectTemplates, projects } = await import(
       "../src/lib/db/schema"
     );
     const {
@@ -55,6 +55,7 @@ async function main() {
     const { eq } = await import("drizzle-orm");
     const { PROJECT_STATUSES } = await import("../src/lib/projects/types");
     const { createDocument, createMilestone, createTask, deleteDocument, deleteMilestone, deleteTask, toggleMilestone, updateDocument, updateTask } = await import("../src/lib/workspace/server");
+    const { createProjectFromTemplate, createTemplate, deleteTemplate, getProjectTemplates, updateTemplate } = await import("../src/lib/templates/server");
     const { clippedRange, dateRange, periodFor, shiftPeriod, timelineProject } = await import("../src/lib/timeline/date");
 
     await createProject(projectForm());
@@ -227,6 +228,54 @@ async function main() {
     deleteTask(surviving.id, refreshed.tasks.find((task) => task.title === "Disposable task")!.id);
     deleteMilestone(surviving.id, refreshed.milestones.find((milestone) => milestone.title === "Disposable milestone")!.id);
     deleteDocument(surviving.id, refreshed.documents.find((document) => document.title === "Disposable document")!.id);
+
+    const starterTemplates = getProjectTemplates();
+    assert.equal(starterTemplates.filter((template) => template.isStarter).length, 3);
+    const clientTemplate = starterTemplates.find((template) => template.id === "starter-client-delivery");
+    assert.ok(clientTemplate);
+    assert.equal(clientTemplate.tasks.length, 4);
+    assert.equal(clientTemplate.milestones.length, 3);
+    assert.equal(clientTemplate.documents.length, 1);
+    assert.equal(clientTemplate.requiresStartDate, true);
+
+    const templateForm = new FormData();
+    templateForm.set("templatePayload", JSON.stringify({
+      name: "Personal planning", description: "My reusable local plan", type: "personal", status: "planning", priority: "normal", color: "#2563eb", tags: "personal, plan",
+      tasks: [{ title: "Write outline", detail: "Start small", status: "todo", dueOffsetDays: 2 }],
+      milestones: [{ title: "Outline agreed", targetOffsetDays: 3 }],
+      documents: [{ title: "Notes", content: "# Notes" }],
+    }));
+    const personalTemplateId = createTemplate(templateForm);
+    assert.equal(getProjectTemplates().some((template) => template.id === personalTemplateId && !template.isStarter), true);
+    assert.throws(() => updateTemplate(clientTemplate.id, templateForm), ProjectValidationError);
+    assert.throws(() => deleteTemplate(clientTemplate.id), ProjectValidationError);
+
+    templateForm.set("templatePayload", JSON.stringify({
+      name: "Personal planning updated", description: "My reusable local plan", type: "personal", status: "planning", priority: "normal", color: "#2563eb", tags: "personal, plan",
+      tasks: [{ title: "Write outline", detail: "Start small", status: "todo", dueOffsetDays: 2 }],
+      milestones: [{ title: "Outline agreed", targetOffsetDays: 3 }],
+      documents: [{ title: "Notes", content: "# Notes" }],
+    }));
+    updateTemplate(personalTemplateId, templateForm);
+    assert.equal(getProjectTemplates().find((template) => template.id === personalTemplateId)?.name, "Personal planning updated");
+
+    const beforeTemplateProjectCount = database.select().from(projects).all().length;
+    const cloneForm = projectForm({ name: "Acme delivery", startDate: "2026-04-01", deadline: "" });
+    const cloneId = await createProjectFromTemplate(clientTemplate.id, cloneForm);
+    const clonedProject = getProjects().find((project) => project.id === cloneId);
+    assert.ok(clonedProject);
+    assert.equal(clonedProject.tasks.length, clientTemplate.tasks.length);
+    assert.equal(clonedProject.milestones.length, clientTemplate.milestones.length);
+    assert.equal(clonedProject.documents.length, clientTemplate.documents.length);
+    assert.equal(clonedProject.tasks.find((task) => task.title === "Prepare delivery plan")?.dueDate, "2026-04-03");
+    assert.equal(clonedProject.milestones.find((milestone) => milestone.title === "Final handoff")?.targetDate, "2026-04-22");
+    assert.equal(clonedProject.deadline, "2026-04-22");
+    assert.ok(getProjectWorkspace(cloneId)?.activity.some((event) => event.type === "created_from_template"));
+
+    await expectValidation(() => createProjectFromTemplate(clientTemplate.id, projectForm({ name: "Invalid delivery", startDate: "2026-04-01", deadline: "2026-04-10" })));
+    assert.equal(database.select().from(projects).all().length, beforeTemplateProjectCount + 1);
+    deleteTemplate(personalTemplateId);
+    assert.equal(database.select().from(projectTemplates).where(eq(projectTemplates.id, personalTemplateId)).all().length, 0);
 
     console.info("Project domain tests passed.");
   } finally {

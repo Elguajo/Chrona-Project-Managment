@@ -11,6 +11,7 @@ import {
   restoreProject,
   updateProject,
 } from "@/lib/projects/server";
+import { createProjectFromTemplate } from "@/lib/templates/server";
 import type { ProjectActionResult } from "@/lib/projects/types";
 import { PROJECT_STATUSES, type ProjectStatus } from "@/lib/projects/types";
 
@@ -24,7 +25,12 @@ export async function createProjectAction(
   formData: FormData,
 ): Promise<ProjectActionResult> {
   try {
-    await createProject(formData);
+    const templateId = formData.get("templateId");
+    if (typeof templateId === "string" && templateId) {
+      await createProjectFromTemplate(templateId, formData);
+    } else {
+      await createProject(formData);
+    }
     revalidatePath("/");
     return { ok: true };
   } catch (error) {

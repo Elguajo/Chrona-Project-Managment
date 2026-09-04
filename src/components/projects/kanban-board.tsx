@@ -24,7 +24,9 @@ import {
   type ProjectActionResult,
   type ProjectRecord,
   type ProjectStatus,
+  type ProjectTemplateRecord,
 } from "@/lib/projects/types";
+import { addCalendarDays, localToday } from "@/lib/timeline/date";
 
 const INITIAL_ACTION_STATE: ProjectActionResult = { ok: false };
 
@@ -57,9 +59,9 @@ function moveInMemory(projects: ProjectRecord[], projectId: string, toStatus: Pr
   return remaining;
 }
 
-type KanbanBoardProps = { projects: ProjectRecord[] };
+type KanbanBoardProps = { projects: ProjectRecord[]; templates?: ProjectTemplateRecord[] };
 
-export function KanbanBoard({ projects }: KanbanBoardProps) {
+export function KanbanBoard({ projects, templates = [] }: KanbanBoardProps) {
   const router = useRouter();
   const [boardProjects, setBoardProjects] = useState(projects);
   const [editingId, setEditingId] = useState<string | "new" | null>(null);
@@ -235,7 +237,7 @@ export function KanbanBoard({ projects }: KanbanBoardProps) {
         </details>
       )}
 
-      <ProjectDrawer open={editingId !== null} project={editingProject} onClose={() => setEditingId(null)} />
+      <ProjectDrawer open={editingId !== null} project={editingProject} templates={templates} onClose={() => setEditingId(null)} />
     </section>
   );
 }
@@ -294,7 +296,7 @@ function KanbanCard({
   );
 }
 
-export function ProjectDrawer({ open, project, onClose }: { open: boolean; project: ProjectRecord | null; onClose: () => void }) {
+export function ProjectDrawer({ open, project, templates = [], onClose }: { open: boolean; project: ProjectRecord | null; templates?: ProjectTemplateRecord[]; onClose: () => void }) {
   const dialogRef = useRef<HTMLDialogElement>(null);
 
   useEffect(() => {
@@ -324,16 +326,20 @@ export function ProjectDrawer({ open, project, onClose }: { open: boolean; proje
           <Button type="button" variant="ghost" size="icon" onClick={onClose} aria-label="Close project drawer"><X aria-hidden="true" /></Button>
         </div>
         {project && <Link href={`/projects/${project.id}`} className="mt-5 inline-flex text-sm font-medium text-[var(--accent)] underline-offset-4 hover:underline">Open full workspace</Link>}
-        <ProjectForm key={project?.id ?? "new"} project={project} onSaved={onClose} />
+        <ProjectForm key={project?.id ?? "new"} project={project} templates={templates} onSaved={onClose} />
         {project && <><ProjectWorkspace project={project} /><ProjectLifecycleActions project={project} onComplete={onClose} /></>}
       </div>
     </dialog>
   );
 }
 
-export function ProjectForm({ project, onSaved }: { project: ProjectRecord | null; onSaved: () => void }) {
+export function ProjectForm({ project, templates = [], onSaved }: { project: ProjectRecord | null; templates?: ProjectTemplateRecord[]; onSaved: () => void }) {
   const router = useRouter();
   const [state, formAction, pending] = useActionState(project ? updateProjectAction : createProjectAction, INITIAL_ACTION_STATE);
+  const [templateId, setTemplateId] = useState("");
+  const template = !project ? templates.find((item) => item.id === templateId) ?? null : null;
+  const templateStart = template ? localToday() : "";
+  const templateDeadline = template?.maxOffsetDays === null || template?.maxOffsetDays === undefined ? "" : addCalendarDays(templateStart, template.maxOffsetDays);
 
   useEffect(() => {
     if (state.ok) {
@@ -343,25 +349,26 @@ export function ProjectForm({ project, onSaved }: { project: ProjectRecord | nul
   }, [onSaved, router, state.ok]);
 
   return (
-    <form action={formAction} className="mt-6 grid gap-4" encType="multipart/form-data">
+    <form key={`${project?.id ?? "new"}:${templateId}`} action={formAction} className="mt-6 grid gap-4" encType="multipart/form-data">
       {project && <input type="hidden" name="projectId" value={project.id} />}
-      <Field label="Name" required><input data-autofocus name="name" required maxLength={160} defaultValue={project?.name} className="field" /></Field>
+      {!project && templates.length > 0 && <Field label="Start from template"><select name="templateId" value={templateId} onChange={(event) => setTemplateId(event.target.value)} className="field"><option value="">Blank project</option>{templates.map((item) => <option key={item.id} value={item.id}>{item.name}{item.isStarter ? " · starter" : ""}</option>)}</select>{template && <span className="text-xs font-normal text-[var(--muted-foreground)]">Creates {template.tasks.length} tasks, {template.milestones.length} milestones, and {template.documents.length} documents. Start date is required for its schedule.</span>}</Field>}
+      <Field label="Name" required><input data-autofocus name="name" required maxLength={160} defaultValue={project?.name ?? template?.name ?? ""} className="field" /></Field>
       <div className="grid gap-4 sm:grid-cols-2">
-        <Field label="Status"><select name="status" defaultValue={project?.status ?? "pitch"} className="field">{PROJECT_STATUSES.map((value) => <option key={value} value={value}>{displayLabel(value)}</option>)}</select></Field>
-        <Field label="Type"><select name="type" defaultValue={project?.type ?? ""} className="field"><option value="">Unspecified</option>{PROJECT_TYPES.map((value) => <option key={value} value={value}>{displayLabel(value)}</option>)}</select></Field>
-        <Field label="Start date"><input name="startDate" type="date" defaultValue={project?.startDate ?? ""} className="field" /></Field>
-        <Field label="Deadline"><input name="deadline" type="date" defaultValue={project?.deadline ?? ""} className="field" /></Field>
+        <Field label="Status"><select name="status" defaultValue={project?.status ?? template?.status ?? "pitch"} className="field">{PROJECT_STATUSES.map((value) => <option key={value} value={value}>{displayLabel(value)}</option>)}</select></Field>
+        <Field label="Type"><select name="type" defaultValue={project?.type ?? template?.type ?? ""} className="field"><option value="">Unspecified</option>{PROJECT_TYPES.map((value) => <option key={value} value={value}>{displayLabel(value)}</option>)}</select></Field>
+        <Field label="Start date" required={Boolean(template?.requiresStartDate)}><input name="startDate" type="date" required={Boolean(template?.requiresStartDate)} defaultValue={project?.startDate ?? templateStart} className="field" /></Field>
+        <Field label="Deadline"><input name="deadline" type="date" defaultValue={project?.deadline ?? templateDeadline} className="field" /></Field>
         <Field label="Work progress"><input name="workProgress" type="number" min="0" max="100" step="1" required defaultValue={project?.workProgress ?? 0} className="field" /></Field>
-        <Field label="Priority"><select name="priority" defaultValue={project?.priority ?? ""} className="field"><option value="">Unspecified</option>{PROJECT_PRIORITIES.map((value) => <option key={value} value={value}>{displayLabel(value)}</option>)}</select></Field>
+        <Field label="Priority"><select name="priority" defaultValue={project?.priority ?? template?.priority ?? ""} className="field"><option value="">Unspecified</option>{PROJECT_PRIORITIES.map((value) => <option key={value} value={value}>{displayLabel(value)}</option>)}</select></Field>
       </div>
       <Field label="Client"><input name="clientName" maxLength={160} defaultValue={project?.clientName ?? ""} className="field" /></Field>
-      <Field label="Description"><textarea name="description" maxLength={5000} defaultValue={project?.description ?? ""} className="field min-h-20" /></Field>
-      <Field label="Tags"><input name="tags" maxLength={600} defaultValue={project?.tags.join(", ") ?? ""} placeholder="portfolio, client" className="field" /></Field>
+      <Field label="Description"><textarea name="description" maxLength={5000} defaultValue={project?.description ?? template?.description ?? ""} className="field min-h-20" /></Field>
+      <Field label="Tags"><input name="tags" maxLength={600} defaultValue={project?.tags.join(", ") ?? template?.tags.join(", ") ?? ""} placeholder="portfolio, client" className="field" /></Field>
       <div className="grid gap-4 sm:grid-cols-2">
         <Field label="Link title"><input name="linkTitle" maxLength={160} defaultValue={project?.links[0]?.title ?? ""} className="field" /></Field>
         <Field label="Link URL"><input name="linkUrl" type="url" maxLength={2048} defaultValue={project?.links[0]?.url ?? ""} className="field" /></Field>
         <Field label="Link type"><select name="linkType" defaultValue={project?.links[0]?.type ?? "custom"} className="field">{LINK_TYPES.map((value) => <option key={value} value={value}>{displayLabel(value)}</option>)}</select></Field>
-        <Field label="Color"><input name="color" type="color" defaultValue={project?.color ?? "#3b82f6"} className="field h-9 p-1" /></Field>
+        <Field label="Color"><input name="color" type="color" defaultValue={project?.color ?? template?.color ?? "#3b82f6"} className="field h-9 p-1" /></Field>
       </div>
       <Field label="Cover"><select name="coverMode" defaultValue={project?.coverMode ?? "none"} className="field">{COVER_MODES.map((value) => <option key={value} value={value}>{displayLabel(value)}</option>)}</select></Field>
       <Field label="Local cover image"><input name="coverImage" type="file" accept="image/png,image/jpeg,image/gif,image/webp" className="block w-full text-sm" /></Field>

@@ -22,6 +22,13 @@
       "when": 1788435212808,
       "tag": "0002_sticky_redwing",
       "breakpoints": true
+    },
+    {
+      "idx": 3,
+      "version": "6",
+      "when": 1788492141581,
+      "tag": "0003_shallow_donald_blake",
+      "breakpoints": true
     }
   ]
 }

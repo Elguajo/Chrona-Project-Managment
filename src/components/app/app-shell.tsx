@@ -1,17 +1,20 @@
 "use client";
 
-import { Database, LayoutDashboard, List, PanelTop, Settings2, SquaresUnite } from "lucide-react";
+import { Database, LayoutDashboard, LayoutTemplate, List, PanelTop, Settings2, SquaresUnite } from "lucide-react";
 import { useState } from "react";
 
 import { Button } from "@/components/ui/button";
 import { KanbanBoard } from "@/components/projects/kanban-board";
 import { ProjectDashboard } from "@/components/projects/dashboard";
 import { ProjectList } from "@/components/projects/project-list";
+import { TemplatesPanel } from "@/components/projects/templates-panel";
 import { Timeline } from "@/components/projects/timeline";
-import type { ProjectRecord } from "@/lib/projects/types";
+import { QuickAdd } from "@/components/app/quick-add";
+import type { ProjectRecord, ProjectTemplateRecord } from "@/lib/projects/types";
 
 type AppShellProps = {
   projects: ProjectRecord[];
+  templates: ProjectTemplateRecord[];
 };
 
 const navigationItems = [
@@ -19,9 +22,10 @@ const navigationItems = [
   { label: "Kanban", icon: PanelTop, view: "kanban" },
   { label: "Timeline", icon: LayoutDashboard, view: "timeline" },
   { label: "List", icon: List, view: "list" },
+  { label: "Templates", icon: LayoutTemplate, view: "templates" },
 ] as const;
 
-export function AppShell({ projects }: AppShellProps) {
+export function AppShell({ projects, templates }: AppShellProps) {
   const [view, setView] = useState<(typeof navigationItems)[number]["view"]>("dashboard");
   return (
     <div className="min-h-svh bg-[var(--background)]">
@@ -38,10 +42,7 @@ export function AppShell({ projects }: AppShellProps) {
             <p className="text-xs text-[var(--muted-foreground)]">Single-owner workspace</p>
           </div>
         </div>
-        <Button variant="outline" size="sm" disabled aria-label="Settings arrive in a later phase">
-          <Settings2 className="size-4" aria-hidden="true" />
-          Settings
-        </Button>
+        <div className="flex items-center gap-2"><QuickAdd projects={projects} templates={templates} /><Button variant="outline" size="sm" disabled aria-label="Settings arrive in a later phase"><Settings2 className="size-4" aria-hidden="true" />Settings</Button></div>
       </header>
 
       <main className="mx-auto w-full max-w-7xl px-5 py-8 sm:px-8">
@@ -77,7 +78,7 @@ export function AppShell({ projects }: AppShellProps) {
           ))}
         </nav>
 
-        {view === "dashboard" ? <ProjectDashboard projects={projects} /> : view === "kanban" ? <KanbanBoard projects={projects} /> : view === "timeline" ? <Timeline projects={projects} /> : <ProjectList projects={projects} />}
+        {view === "dashboard" ? <ProjectDashboard projects={projects} /> : view === "kanban" ? <KanbanBoard projects={projects} templates={templates} /> : view === "timeline" ? <Timeline projects={projects} /> : view === "list" ? <ProjectList projects={projects} /> : <TemplatesPanel templates={templates} />}
       </main>
     </div>
   );

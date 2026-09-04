@@ -170,3 +170,81 @@ export const projectDocuments = sqliteTable(
   },
   (table) => [index("project_documents_project_id_idx").on(table.projectId)],
 );
+
+export const projectTemplates = sqliteTable(
+  "project_templates",
+  {
+    id: text("id").primaryKey(),
+    name: text("name").notNull(),
+    description: text("description"),
+    type: text("type"),
+    status: text("status").notNull().default("planning"),
+    priority: text("priority"),
+    color: text("color"),
+    isStarter: integer("is_starter", { mode: "boolean" }).notNull().default(false),
+    createdAt: text("created_at").notNull(),
+    updatedAt: text("updated_at").notNull(),
+  },
+  (table) => [index("project_templates_starter_idx").on(table.isStarter)],
+);
+
+export const projectTemplateTags = sqliteTable(
+  "project_template_tags",
+  {
+    templateId: text("template_id")
+      .notNull()
+      .references(() => projectTemplates.id, { onDelete: "cascade" }),
+    name: text("name").notNull(),
+  },
+  (table) => [primaryKey({ columns: [table.templateId, table.name] })],
+);
+
+export const projectTemplateTasks = sqliteTable(
+  "project_template_tasks",
+  {
+    id: text("id").primaryKey(),
+    templateId: text("template_id")
+      .notNull()
+      .references(() => projectTemplates.id, { onDelete: "cascade" }),
+    title: text("title").notNull(),
+    detail: text("detail"),
+    status: text("status").notNull().default("todo"),
+    dueOffsetDays: integer("due_offset_days"),
+    sortOrder: real("sort_order").notNull().default(0),
+  },
+  (table) => [
+    check("project_template_tasks_due_offset_non_negative", sql`${table.dueOffsetDays} is null or ${table.dueOffsetDays} >= 0`),
+    index("project_template_tasks_template_id_idx").on(table.templateId),
+  ],
+);
+
+export const projectTemplateMilestones = sqliteTable(
+  "project_template_milestones",
+  {
+    id: text("id").primaryKey(),
+    templateId: text("template_id")
+      .notNull()
+      .references(() => projectTemplates.id, { onDelete: "cascade" }),
+    title: text("title").notNull(),
+    targetOffsetDays: integer("target_offset_days").notNull(),
+    sortOrder: real("sort_order").notNull().default(0),
+  },
+  (table) => [
+    check("project_template_milestones_target_offset_non_negative", sql`${table.targetOffsetDays} >= 0`),
+    index("project_template_milestones_template_id_idx").on(table.templateId),
+  ],
+);
+
+export const projectTemplateDocuments = sqliteTable(
+  "project_template_documents",
+  {
+    id: text("id").primaryKey(),
+    templateId: text("template_id")
+      .notNull()
+      .references(() => projectTemplates.id, { onDelete: "cascade" }),
+    title: text("title").notNull(),
+    content: text("content").notNull().default(""),
+    sortOrder: real("sort_order").notNull().default(0),
+  },
+  (table) => [index("project_template_documents_template_id_idx").on(table.templateId)],
+);
