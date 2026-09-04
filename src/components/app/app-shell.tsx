@@ -29,6 +29,7 @@ const navigationItems = [
 
 export function AppShell({ projects, templates }: AppShellProps) {
   const [view, setView] = useState<(typeof navigationItems)[number]["view"]>("dashboard");
+  const projectRevision = projects.map((project) => `${project.id}:${project.updatedAt}`).join("|");
   return (
     <div className="min-h-svh bg-[var(--background)]">
       <header className="flex min-h-16 items-center justify-between border-b px-5 sm:px-8">
@@ -80,7 +81,7 @@ export function AppShell({ projects, templates }: AppShellProps) {
           ))}
         </nav>
 
-        {view === "dashboard" ? <ProjectDashboard projects={projects} /> : view === "kanban" ? <KanbanBoard projects={projects} templates={templates} /> : view === "timeline" ? <Timeline projects={projects} /> : view === "calendar" ? <ProjectCalendar projects={projects} /> : view === "list" ? <ProjectList projects={projects} /> : <TemplatesPanel templates={templates} />}
+        {view === "dashboard" ? <ProjectDashboard projects={projects} /> : view === "kanban" ? <KanbanBoard key={projectRevision} projects={projects} templates={templates} /> : view === "timeline" ? <Timeline projects={projects} /> : view === "calendar" ? <ProjectCalendar projects={projects} /> : view === "list" ? <ProjectList projects={projects} /> : <TemplatesPanel templates={templates} />}
       </main>
     </div>
   );

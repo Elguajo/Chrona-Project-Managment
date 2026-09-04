@@ -72,10 +72,6 @@ export function KanbanBoard({ projects, templates = [] }: KanbanBoardProps) {
   const [priority, setPriority] = useState("");
   const [type, setType] = useState("");
 
-  useEffect(() => {
-    setBoardProjects(projects);
-  }, [projects]);
-
   const editingProject = editingId && editingId !== "new"
     ? boardProjects.find((project) => project.id === editingId) ?? null
     : null;
