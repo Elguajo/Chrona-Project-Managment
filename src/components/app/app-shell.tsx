@@ -52,7 +52,7 @@ export function AppShell({ projects, templates }: AppShellProps) {
         <div className="flex flex-wrap items-center justify-end gap-2"><BackupControls /><QuickAdd projects={projects} templates={templates} /><Button variant="outline" size="sm" disabled aria-label="Settings arrive in a later phase"><Settings2 className="size-4" aria-hidden="true" />Settings</Button></div>
       </header>
 
-      <main className="w-full px-5 py-8 sm:px-8">
+      <main className="w-full overflow-x-hidden px-5 py-8 sm:px-8">
         <div className="mx-auto max-w-7xl">
           <div className="flex flex-col gap-6 border-b pb-6 sm:flex-row sm:items-end sm:justify-between">
             <div>
