@@ -349,7 +349,7 @@ export function ProjectForm({ project, templates = [], onSaved }: { project: Pro
   }, [onSaved, router, state.ok]);
 
   return (
-    <form key={`${project?.id ?? "new"}:${templateId}`} action={formAction} className="mt-6 grid gap-4" encType="multipart/form-data">
+    <form key={`${project?.id ?? "new"}:${templateId}`} action={formAction} className="mt-6 grid gap-4">
       {project && <input type="hidden" name="projectId" value={project.id} />}
       {!project && templates.length > 0 && <Field label="Start from template"><select name="templateId" value={templateId} onChange={(event) => setTemplateId(event.target.value)} className="field"><option value="">Blank project</option>{templates.map((item) => <option key={item.id} value={item.id}>{item.name}{item.isStarter ? " · starter" : ""}</option>)}</select>{template && <span className="text-xs font-normal text-[var(--muted-foreground)]">Creates {template.tasks.length} tasks, {template.milestones.length} milestones, and {template.documents.length} documents. Start date is required for its schedule.</span>}</Field>}
       <Field label="Name" required><input data-autofocus name="name" required maxLength={160} defaultValue={project?.name ?? template?.name ?? ""} className="field" /></Field>
