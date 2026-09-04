@@ -46,6 +46,7 @@
 
 html {
   background: var(--background);
+  overflow-x: hidden;
 }
 
 body {
