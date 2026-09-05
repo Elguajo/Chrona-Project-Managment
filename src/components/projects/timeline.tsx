@@ -301,7 +301,7 @@ export function Timeline({ projects, viewport, onViewportChange }: TimelineProps
     <section className="mt-8 flex min-h-[calc(100svh-17rem)] flex-col" aria-labelledby="timeline-title">
       <div className="flex flex-col gap-5 border-b pb-5 xl:flex-row xl:items-end xl:justify-between">
         <div>
-          <p className="text-sm font-medium text-[var(--accent)]">Portfolio timing</p>
+          <p className="text-xs font-medium text-[var(--muted-foreground)]">Portfolio timing</p>
           <h2 id="timeline-title" className="mt-1 text-2xl font-semibold tracking-tight">Timeline</h2>
           <p className="mt-1 text-sm text-[var(--muted-foreground)]">Scroll to zoom. Pan with the middle button or Space + drag. Project ranges use date-only values.</p>
         </div>

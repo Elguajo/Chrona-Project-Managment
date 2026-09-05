@@ -68,7 +68,7 @@ export function ProjectCalendar({ projects }: { projects: ProjectRecord[] }) {
   return <section className="mt-8" aria-labelledby="calendar-title">
     <div className="flex flex-col gap-5 border-b pb-5 lg:flex-row lg:items-end lg:justify-between">
       <div>
-        <p className="text-sm font-medium text-[var(--accent)]">Portfolio agenda</p>
+        <p className="text-xs font-medium text-[var(--muted-foreground)]">Portfolio agenda</p>
         <h2 id="calendar-title" className="mt-1 text-2xl font-semibold tracking-tight">Calendar</h2>
         <p className="mt-1 text-sm text-[var(--muted-foreground)]">Date-only deadlines, open tasks, and open milestones from their owning Projects.</p>
       </div>

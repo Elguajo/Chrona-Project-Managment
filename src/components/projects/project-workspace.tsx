@@ -82,14 +82,14 @@ export function ProjectWorkspace({ project }: { project: ProjectRecord }) {
           </form>
           <div className="mt-3 grid gap-3">
             {project.tasks.length === 0 ? <Empty>Nothing to do yet.</Empty> : project.tasks.map((task) => (
-              <form key={task.id} onSubmit={submit(updateTaskAction, "Task saved.")} className="grid gap-3 border p-3 sm:grid-cols-[minmax(0,1fr)_9rem_8rem_auto]">
+              <form key={task.id} onSubmit={submit(updateTaskAction, "Task saved.")} className="grid gap-3 border p-3 sm:grid-cols-2">
                 <input type="hidden" name="projectId" value={project.id} />
                 <input type="hidden" name="taskId" value={task.id} />
-                <Field label="Task"><input name="title" required maxLength={240} defaultValue={task.title} className="field" disabled={readOnly || pending} /></Field>
+                <Field label="Task" className="sm:col-span-2"><input name="title" required maxLength={240} defaultValue={task.title} className="field" disabled={readOnly || pending} /></Field>
                 <Field label="Status"><select name="status" defaultValue={task.status} className="field" disabled={readOnly || pending}>{TASK_STATUSES.map((status) => <option key={status} value={status}>{displayLabel(status)}</option>)}</select></Field>
                 <Field label="Due"><input name="dueDate" type="date" defaultValue={task.dueDate ?? ""} className="field" disabled={readOnly || pending} /></Field>
                 <div className="flex items-end gap-2"><Button type="submit" size="sm" variant="outline" disabled={readOnly || pending}><Save aria-hidden="true" /> Save</Button><Button type="button" size="sm" variant="destructive" disabled={readOnly || pending} onClick={() => remove(deleteTaskAction, formData(project.id, "taskId", task.id), `task “${task.title}”`)}><Trash2 aria-hidden="true" /><span className="sr-only">Delete task</span></Button></div>
-                <Field label="Detail" className="sm:col-span-4"><input name="detail" maxLength={5000} defaultValue={task.detail ?? ""} className="field" disabled={readOnly || pending} /></Field>
+                <Field label="Detail" className="sm:col-span-2"><input name="detail" maxLength={5000} defaultValue={task.detail ?? ""} className="field" disabled={readOnly || pending} /></Field>
               </form>
             ))}
           </div>

@@ -99,7 +99,7 @@ export function TemplatesPanel({ templates }: { templates: ProjectTemplateRecord
   return <section className="mt-8" aria-labelledby="templates-title">
     <div className="flex flex-col gap-4 border-b pb-5 sm:flex-row sm:items-end sm:justify-between">
       <div>
-        <p className="text-sm font-medium text-[var(--accent)]">Reusable structures</p>
+        <p className="text-xs font-medium text-[var(--muted-foreground)]">Reusable structures</p>
         <h2 id="templates-title" className="mt-1 text-2xl font-semibold tracking-tight">Project templates</h2>
         <p className="mt-1 text-sm text-[var(--muted-foreground)]">Start a local project with ready tasks, dated milestones, and a document.</p>
       </div>

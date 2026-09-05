@@ -64,15 +64,24 @@ a:focus-visible,
 input:focus-visible,
 select:focus-visible,
 textarea:focus-visible {
-  outline: 2px solid var(--ring);
+  outline: 2px solid var(--primary);
 }
 
-.field {
-  width: 100%;
-  border: 1px solid var(--input);
-  background: var(--background);
-  padding: 0.45rem 0.6rem;
-  color: var(--foreground);
+@layer components {
+  .field {
+    width: 100%;
+    min-width: 0;
+    min-height: 2.5rem;
+    border-radius: var(--radius-md);
+    font-size: 0.875rem;
+    font-weight: 400;
+    line-height: 1.5;
+    transition: border-color 140ms ease, background-color 140ms ease;
+    border: 1px solid var(--input);
+    background: var(--background);
+    padding: 0.45rem 0.6rem;
+    color: var(--foreground);
+  }
 }
 
 @theme inline {
@@ -119,6 +128,7 @@ textarea:focus-visible {
 }
 
 .dark {
+  color-scheme: dark;
   --background: oklch(0.145 0 0);
   --foreground: oklch(0.985 0 0);
   --card: oklch(0.205 0 0);
@@ -162,4 +172,38 @@ textarea:focus-visible {
   html {
     @apply font-sans;
   }
+}
+
+/* Shared controls keep native semantics and the existing graphite/lime palette. */
+.field:hover:not(:disabled) { border-color: var(--muted-foreground); }
+.field:focus-visible { outline-color: var(--primary); outline-offset: 2px; }
+.field:disabled { opacity: 0.5; cursor: not-allowed; }
+.field[aria-invalid="true"] { border-color: var(--destructive); }
+.view-tab { position: relative; border-color: transparent; }
+.view-tab[aria-current="page"]::after {
+  content: "";
+  position: absolute;
+  bottom: -0.55rem;
+  left: 0.75rem;
+  right: 0.75rem;
+  height: 2px;
+  background: var(--accent);
+}
+@media (max-width: 639px) {
+  .view-tab { min-height: 2.75rem; }
+  .view-tab[aria-current="page"]::after { bottom: 0; }
+  .field { font-size: 1rem; }
+}
+@media (pointer: coarse) {
+  [data-slot="button"], .field { min-height: 2.75rem; }
+  [data-slot="button"] { min-width: 2.75rem; }
+}
+@media (prefers-reduced-motion: no-preference) {
+  .project-drawer[open] { animation: drawer-enter 160ms ease-out; }
+  .command-palette[open] { animation: palette-enter 160ms ease-out; }
+}
+@keyframes drawer-enter { from { opacity: 0; transform: translateX(1rem); } to { opacity: 1; transform: translateX(0); } }
+@keyframes palette-enter { from { opacity: 0; transform: translateY(0.5rem); } to { opacity: 1; transform: translateY(0); } }
+@media (prefers-reduced-motion: reduce) {
+  .field { transition: none; }
 }

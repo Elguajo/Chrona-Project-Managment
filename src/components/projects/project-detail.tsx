@@ -5,9 +5,10 @@ import { ArrowLeft, CalendarDays, ExternalLink, Flag, ListChecks, Pencil } from 
 import { useEffect, useRef } from "react";
 
 import { ProjectForm } from "@/components/projects/kanban-board";
+import { QuickAdd } from "@/components/app/quick-add";
 import { ProjectWorkspace } from "@/components/projects/project-workspace";
 import { timelineProject } from "@/lib/timeline/date";
-import type { ProjectActivityRecord, ProjectRecord } from "@/lib/projects/types";
+import type { ProjectActivityRecord, ProjectRecord, ProjectTemplateRecord } from "@/lib/projects/types";
 
 function displayLabel(value: string) {
   return value.replaceAll("_", " ").replace(/\b\w/g, (character) => character.toUpperCase());
@@ -48,7 +49,7 @@ function Progress({ label, value, unavailable = false }: { label: string; value:
   return <div><div className="flex items-baseline justify-between gap-3"><span className="text-sm font-medium">{label}</span><span className="text-sm tabular-nums text-[var(--muted-foreground)]">{unavailable || value === null ? "No dated plan" : `${value}%`}</span></div><div className="mt-2 h-2 overflow-hidden rounded-full bg-[var(--muted)]" aria-hidden="true">{value !== null && <span className="block h-full bg-[var(--accent)]" style={{ width: `${value}%` }} />}</div></div>;
 }
 
-export function ProjectDetail({ project, activity }: { project: ProjectRecord; activity: ProjectActivityRecord[] }) {
+export function ProjectDetail({ project, activity, projects, templates }: { project: ProjectRecord; activity: ProjectActivityRecord[]; projects: ProjectRecord[]; templates: ProjectTemplateRecord[] }) {
   const headingRef = useRef<HTMLHeadingElement>(null);
   const timeline = timelineProject(project);
   const doneTasks = project.tasks.filter((task) => task.status === "done").length;
@@ -59,7 +60,7 @@ export function ProjectDetail({ project, activity }: { project: ProjectRecord; a
   }, []);
 
   return <main className="mx-auto w-full max-w-6xl px-5 py-8 sm:px-8">
-    <Link href="/" className="inline-flex items-center gap-2 text-sm font-medium text-[var(--accent)] underline-offset-4 hover:underline"><ArrowLeft className="size-4" aria-hidden="true" /> Back to portfolio</Link>
+    <div className="flex flex-wrap items-center justify-between gap-3"><Link href="/" className="inline-flex items-center gap-2 text-sm font-medium text-[var(--accent)] underline-offset-4 hover:underline"><ArrowLeft className="size-4" aria-hidden="true" /> Back to portfolio</Link><QuickAdd projects={projects} templates={templates} /></div>
     <header className="mt-5 border-b pb-6">
       <p className="text-sm font-medium text-[var(--accent)]">Project workspace</p>
       <div className="mt-2 flex flex-wrap items-start justify-between gap-4"><div><h1 ref={headingRef} tabIndex={-1} className="text-3xl font-semibold tracking-tight focus-visible:outline-2 focus-visible:outline-[var(--ring)]">{project.name}</h1><p className="mt-2 max-w-3xl text-sm leading-6 text-[var(--muted-foreground)]">{project.description ?? "No description yet."}</p></div><span className="border px-3 py-1 text-sm font-medium">{displayLabel(project.status)}</span></div>

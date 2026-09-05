@@ -1,6 +1,6 @@
 "use client";
 
-import { useActionState, useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState, useTransition } from "react";
 import { Archive, ArchiveRestore, GripVertical, Plus, Search, Trash2, X } from "lucide-react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
@@ -135,7 +135,7 @@ export function KanbanBoard({ projects, templates = [] }: KanbanBoardProps) {
     <section className="mt-8" aria-labelledby="kanban-title">
       <div className="flex flex-col gap-5 border-b pb-5 lg:flex-row lg:items-end lg:justify-between">
         <div>
-          <p className="text-sm font-medium text-[var(--accent)]">Portfolio lifecycle</p>
+          <p className="text-xs font-medium text-[var(--muted-foreground)]">Portfolio lifecycle</p>
           <h2 id="kanban-title" className="mt-1 text-2xl font-semibold tracking-tight">Kanban</h2>
           <p className="mt-1 text-sm text-[var(--muted-foreground)]">
             Drag cards to reorder or change status. Every card also has a keyboard-accessible Move to control.
@@ -170,7 +170,7 @@ export function KanbanBoard({ projects, templates = [] }: KanbanBoardProps) {
         {notice}
       </p>
 
-      <div className="-mx-5 mt-2 overflow-x-auto px-5 pb-4 sm:-mx-8 sm:px-8">
+      <div className="relative -mx-5 mt-2 overflow-x-auto px-5 pb-4 sm:-mx-8 sm:px-8">
         <div className="grid min-w-max grid-cols-7 gap-4">
           {PROJECT_STATUSES.map((status) => {
             const allInColumn = activeProjects.filter((project) => project.status === status);
@@ -320,7 +320,7 @@ export function ProjectDrawer({ open, project, templates = [], onClose }: { open
   return (
     <dialog
       ref={dialogRef}
-      className="m-0 ml-auto h-dvh w-screen max-w-none overflow-hidden border-l bg-[var(--background)] p-0 text-[var(--foreground)] shadow-2xl backdrop:bg-black/45 sm:h-svh sm:w-full sm:max-w-xl"
+      className="project-drawer m-0 ml-auto h-dvh w-screen max-w-none overflow-hidden border-l bg-[var(--background)] p-0 text-[var(--foreground)] shadow-2xl backdrop:bg-black/45 sm:h-svh sm:w-full sm:max-w-xl"
       aria-labelledby="project-drawer-title"
       onClose={onClose}
       onCancel={(event) => { event.preventDefault(); onClose(); }}
@@ -343,21 +343,30 @@ export function ProjectDrawer({ open, project, templates = [], onClose }: { open
 
 export function ProjectForm({ project, templates = [], onSaved }: { project: ProjectRecord | null; templates?: ProjectTemplateRecord[]; onSaved: () => void }) {
   const router = useRouter();
-  const [state, formAction, pending] = useActionState(project ? updateProjectAction : createProjectAction, INITIAL_ACTION_STATE);
+  const [state, setState] = useState(INITIAL_ACTION_STATE);
+  const [pending, startTransition] = useTransition();
   const [templateId, setTemplateId] = useState("");
   const template = !project ? templates.find((item) => item.id === templateId) ?? null : null;
   const templateStart = template ? localToday() : "";
   const templateDeadline = template?.maxOffsetDays === null || template?.maxOffsetDays === undefined ? "" : addCalendarDays(templateStart, template.maxOffsetDays);
 
-  useEffect(() => {
-    if (state.ok) {
-      router.refresh();
-      onSaved();
-    }
-  }, [onSaved, router, state.ok]);
+  function submit(event: React.FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+    const data = new FormData(event.currentTarget);
+    setState(INITIAL_ACTION_STATE);
+    startTransition(async () => {
+      const result = await (project ? updateProjectAction : createProjectAction)(INITIAL_ACTION_STATE, data);
+      setState(result);
+      if (result.ok) {
+        router.refresh();
+        onSaved();
+      }
+    });
+  }
 
   return (
-    <form key={`${project?.id ?? "new"}:${templateId}`} action={formAction} className="mt-6 grid gap-4">
+    <form key={`${project?.id ?? "new"}:${templateId}`} onSubmit={submit} className="mt-6">
+      <fieldset disabled={pending} className="grid min-w-0 gap-4">
       {project && <input type="hidden" name="projectId" value={project.id} />}
       {!project && templates.length > 0 && <Field label="Start from template"><select name="templateId" value={templateId} onChange={(event) => setTemplateId(event.target.value)} className="field"><option value="">Blank project</option>{templates.map((item) => <option key={item.id} value={item.id}>{item.name}{item.isStarter ? " · starter" : ""}</option>)}</select>{template && <span className="text-xs font-normal text-[var(--muted-foreground)]">Creates {template.tasks.length} tasks, {template.milestones.length} milestones, and {template.documents.length} documents. Start date is required for its schedule.</span>}</Field>}
       <Field label="Name" required><input data-autofocus name="name" required maxLength={160} defaultValue={project?.name ?? template?.name ?? ""} className="field" /></Field>
@@ -381,7 +390,9 @@ export function ProjectForm({ project, templates = [], onSaved }: { project: Pro
       <Field label="Cover"><select name="coverMode" defaultValue={project?.coverMode ?? "none"} className="field">{COVER_MODES.map((value) => <option key={value} value={value}>{displayLabel(value)}</option>)}</select></Field>
       <Field label="Local cover image"><input name="coverImage" type="file" accept="image/png,image/jpeg,image/gif,image/webp" className="block w-full text-sm" /></Field>
       {state.error && <p className="text-sm text-[var(--destructive)]" role="alert">{state.error}</p>}
+      {state.ok && <p role="status" className="text-sm text-[var(--muted-foreground)]">Project saved.</p>}
       <Button type="submit" disabled={pending}><Plus aria-hidden="true" /> {pending ? "Saving…" : project ? "Save project" : "Create project"}</Button>
+      </fieldset>
     </form>
   );
 }

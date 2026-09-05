@@ -1,6 +1,6 @@
 # Local Project OS
 
-Local-first Project OS for one owner. It stores a project portfolio in SQLite, provides a local attention Dashboard plus List, Kanban, Timeline, Calendar, and Templates projections, and keeps lightweight Tasks, dated Milestones, local text Documents, links, and activity inside the owning Project. Calendar renders date-only Project deadlines, unfinished Task due dates, and open Milestones without a view-specific table. Open a Project from its drawer to use the full local workspace at `/projects/[id]`. Three starter templates and personal templates create local Project-owned records; Quick add is available from the header or `⌘/Ctrl+K`. Backup/import and authentication are not included.
+Local-first Project OS for one owner. It stores a project portfolio in SQLite, provides a local attention Dashboard plus List, Kanban, Timeline, Calendar, and Templates projections, and keeps lightweight Tasks, dated Milestones, local text Documents, links, and activity inside the owning Project. Calendar renders date-only Project deadlines, unfinished Task due dates, and open Milestones without a view-specific table. Open a Project from its drawer to use the full local workspace at `/projects/[id]`. Three starter templates and personal templates create local Project-owned records; Quick add is available from the header or `⌘/Ctrl+K`. Versioned local JSON backup export/import is included. Authentication is not included.
 
 ## Requirements
 

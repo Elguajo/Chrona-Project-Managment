@@ -45,7 +45,7 @@ export function BackupControls() {
     } finally { setBusy(false); if (inputRef.current) inputRef.current.value = ""; }
   }
 
-  return <div className="flex flex-wrap items-center justify-end gap-2" aria-label="Local backup controls">
+  return <div className="flex flex-wrap items-center justify-start gap-2 sm:justify-end" aria-label="Local backup controls">
     <Button variant="outline" size="sm" disabled={busy} onClick={() => void exportBackup()}><Download aria-hidden="true" /> Export backup</Button>
     <Button variant="outline" size="sm" disabled={busy} onClick={() => inputRef.current?.click()}><Upload aria-hidden="true" /> Import backup</Button>
     <input ref={inputRef} className="sr-only" type="file" accept="application/json,.json" aria-label="Choose a JSON backup file" onChange={(event) => { const file = event.target.files?.[0]; if (file) void importBackup(file); }} />
